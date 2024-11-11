@@ -49,6 +49,21 @@ B. Code flow
 
 C. Variables used:
     # Following is the list of all the variables used throughout the code (for clarity):
-    1. Altitude : 
-    2. MRR: Main Rotor radius
-    3. TRR: Tail Rotor radius
+    1.	Altitude : Flight altitude of the helicopter
+    2.	MRR: Main Rotor radius
+    3.	TRR: Tail Rotor radius
+    4.	V_inf: Flight velocity
+    5.	VW: Vehicle Weight
+    6.	MR_nb: Main Rotor number of blades
+    7.	TR_nb: Tail rotor number of blades
+    8.	MR_Taper_ratio: Main Rotor Taper ratio
+    9.	TR_Taper_ratio: Tail Rotor Taper ratio
+    10.	MR_rc: Main Rotor Root cut-out
+    11.	TR_rc: Tail Rotor Root cut-out
+    12.	MR_root_twist: Main rotor Root twist
+    13.	MR_tip_twist: Main rotor tip twist
+    14.	TR_root_twist: Tail Rotor root twist
+    15.	TR_tip_twist: Tail rotor tip twist
+    16.	MR_chord: Main rotor blade chord
+    17.	TR_chord: Tail rotor blade chord
+    18.	HS_chord: Horizontal stabilizer blade chord
