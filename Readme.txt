@@ -1,0 +1,53 @@
+A. How to Run
+    1. Necessary libraries:
+    # Please make sure the following libraries are downloaded before you run the code on your own system.
+    a. matplotlib.pyplot
+        Install using the command: pip install matplotlib
+    b. numpy
+        Install using the command: pip install numpy
+    2. Running the code
+    The code flow is simple and modular. The following are the steps to run:
+    a. Enter all your inputs in U_inputs file (Please make sure they are entered in SI units)
+    b. Open and Run the Flight_Simulator.py file (The GUI has been integrated in the same file)
+
+B. Code flow
+    Different files of the code serve different functions. The function/need of each of the files are given for reference:
+    1. AirData.py:
+        This file houses the class (Atmosphere) for calculating environmental data at different altitudes 
+        viz. speed of sound, Density, Temperature, Pressure, etc.
+    2. U_inputs.py:
+        This is the file where all the user inputs are to be plugged in. 
+        Two classes (for Flight Simulator and Mission Planner inputs have been created for convenience)
+    3. Airfoil.py:
+        Gives you the relevant data required for your Airfoil (Cl, Cm, Cd, etc.) at required AOA.
+        Databases of different Airfoils have been stored separately for the purpose
+    4. Flight_Simulator.py:
+        This file brings together all the files and classes to give you your required output
+    5. Fuselage.py:
+        All the relevant calculations for the Fuselage
+    6. Blade.py:
+        Does all the necessary blade-related computations
+    7. Mission_Planner.py:
+        Brings all the classes together to serve the purpose of the mission planner.
+    8. Airfoil databases (NACA files):
+        These files host the required relevant information of/for the airfoils at particular angles of attack.
+    9. Stabilizers.py
+        To compute forces on the horizontal and vertical stabilizers based on stabilizer geometry and 
+        placement.
+    10. Vehicle_Dynamics.py:
+        Takes in instantaneous forces and moments from all components of the 
+        vehicle (main rotor, tail rotor, stabilizers, etc.) and computes the net instantaneous forces 
+        and moments (all three axes) about the vehicle centric reference frame, accounting for the 
+        placement of the components
+    11. Cyclic_Integrator.py:
+        Integrates forces and moments about one complete rotation for 
+        performance computations (thrust, power, moments, etc.)
+    12. Instantaneous_Integrator.py:
+        Integrates instantaneous forces and moments on individual 
+        blades. It relies on all of the above functions in addition to the knowledge of instantaneous 
+        blade location to give answers.
+
+C. Variables used:
+    # Following is the list of all the variables used throughout the code (for clarity):
+    1. Altitude : 
+    2. 
