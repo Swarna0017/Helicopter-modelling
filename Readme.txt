@@ -49,6 +49,7 @@ B. Code flow
 
 C. Variables used:
     # Following is the list of all the variables used throughout the code (for clarity):
+    # Tip: All main rotor variables begin with MR, all tail rotor variables, similarly, begin with TR
     1.	Altitude : Flight altitude of the helicopter
     2.	MRR: Main Rotor radius
     3.	TRR: Tail Rotor radius
