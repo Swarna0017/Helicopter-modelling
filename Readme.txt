@@ -50,4 +50,5 @@ B. Code flow
 C. Variables used:
     # Following is the list of all the variables used throughout the code (for clarity):
     1. Altitude : 
-    2. 
+    2. MRR: Main Rotor radius
+    3. TRR: Tail Rotor radius
