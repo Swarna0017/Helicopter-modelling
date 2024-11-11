@@ -1,5 +1,6 @@
 # Plug all the input values here
 # Please input the values in SI units or else you may need to convert them as you add
+import numpy as np
 def Input_Plugger():
     Altitude        = 2000                      # Geometric altitude in metres
     MRR             = 2000                      # Main Rotor Radius in metres
@@ -20,11 +21,12 @@ def Input_Plugger():
     TR_chord        = 0.09                      # Tail rotor blade chord
     HS_chord        = 0.09                      # Horizontal stabilizer blade chord
     MR_omega        = 123                       # Enter the RPM of the main rotor blades
+    MRA             = np.pi*MRR**2
 
-    return Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega
+    return Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA
  
 # Calling the Input_Plugger function to store the values in the following variables
-Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega = Input_Plugger()
+Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA = Input_Plugger()
 
 # Creating an instance of these variables to use in other files and classes in the rest of the simulator flow.
 class U_Inputs_Simulator:       # This is the class for the input variables of the flight simulator
@@ -32,7 +34,7 @@ class U_Inputs_Simulator:       # This is the class for the input variables of t
                  MR_nb: int, TR_nb: int, MR_Taper_ratio: float, TR_Taper_ratio: float, 
                  MR_rc: float, TR_rc: float, MR_root_twist: float, MR_tip_twist: float, 
                  TR_root_twist: float, TR_tip_twist: float, MR_chord: float, TR_chord: float, 
-                 HS_chord: float):
+                 HS_chord: float, MR_omega: float, MRA: float):
         
         self.Altitude = Altitude
         self.MRR = MRR
@@ -53,6 +55,7 @@ class U_Inputs_Simulator:       # This is the class for the input variables of t
         self.TR_chord = TR_chord
         self.HS_chord = HS_chord
         self.MR_omega = MR_omega
+        self.MRA      = MRA
 
 
 class U_Inputs_Planner:
