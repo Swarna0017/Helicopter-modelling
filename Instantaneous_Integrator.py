@@ -15,8 +15,8 @@ class Thrust():
         self.v=100
         
     def Thrust_Calculator(self):
-        Thrust_hover=2*self.v**2*self.rho*self.A                    # This calculates the Thrust for hover case.
-        Thrust_Climb=2*self.rho*self.A*(self.v+self.V)    # This calculates the Thrust in case of climb
+        Thrust_hover=2*self.v**2*self.rho*self.A                    # This calculates the Thrust for hover case (Momentum Theory)
+        Thrust_Climb=2*self.rho*self.A*(self.v+self.V)              # This calculates the Thrust in case of climb (Momentum Theory)
         return Thrust_hover, Thrust_Climb
     
     def Power_Calculator(self):

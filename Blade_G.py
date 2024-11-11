@@ -1,6 +1,9 @@
 # This file takes in the bladed geometry parameters and returns chord length and pitch angle 
 # of blade section at a given blade location
+# Inputs:: Bladed geometry parameters (radius, twist, taper)
+# Outputs:: Chord length, pitch angle
 from Airfoil import Airfoil
+from U_inputs import *
 
 
 
