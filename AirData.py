@@ -19,7 +19,7 @@ class Atmosphere():
         self.T1 = self.T_0+self.Temp_grad*self.alt
 
     def rho_calc(self):
-        rho=self.rho_0*((self.T1/self.T_0)**4.2586)
+        rho=self.rho_0*((self.T1/self.T_0)**4.2586)         # -(g/aR+1) ~ 4.2586 
         return rho
     
     def speed_of_sound_calc(self):

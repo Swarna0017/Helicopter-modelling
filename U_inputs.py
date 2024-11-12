@@ -27,10 +27,10 @@ def Input_Plugger():
     return Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA
 
 def Pilot_Input_Plugger():
-    theta_0         =10                         # Main Rotor Collective pitch 
-    theta_1s        =2                          # Main Rotor Lateral Cyclic
-    theta_1c        =2                          # Main Rotor Longitudinal Cyclic
-    theta_tail      =8                          # Tail Rotor Collective
+    theta_0         = 10                         # Main Rotor Collective pitch 
+    theta_1s        = 2                          # Main Rotor Lateral Cyclic
+    theta_1c        = 2                          # Main Rotor Longitudinal Cyclic
+    theta_tail      = 8                          # Tail Rotor Collective
     return theta_0, theta_1s, theta_1c, theta_tail
  
 # Calling the Input_Plugger function to store the values in the following variables

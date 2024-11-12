@@ -30,6 +30,7 @@ class Blade:
         self.radial_sec     = self.Blade_sections(100)
         self.pitch_values   = self.Pitch()
         r_theta_values      = self.Blade_Pitch_dict()
+        r_chord_values      = self.Blade_Chord_dict()
 
 
 
