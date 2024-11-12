@@ -3,6 +3,25 @@ from U_inputs import U_Inputs_Simulator                         # Specified inpu
 from AirData import Atmosphere
 from Blade_G import Blade                                       # For importing the relevant blade parameters like chord length, taper, etc.
 
+# I have added the classes for implementing different hover performance prediction methods here
+class MT_Implementor():
+    def __init__(self) -> None:
+        pass
+        
+class BET_Implementor():
+    def __init__(self) -> None:
+        pass
+
+class BEMT_Implementor():
+    def __init__(self) -> None:
+        pass
+
+
+
+
+
+
+
 class Thrust():
     def __init__(self, simulator_inputs=U_Inputs_Simulator):
         

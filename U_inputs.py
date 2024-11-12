@@ -1,6 +1,7 @@
 # Plug all the input values here
 # Please input the values in SI units or else you may need to convert them as you add
 import numpy as np
+
 def Input_Plugger():
     Altitude        = 2000                      # Geometric altitude in metres
     MRR             = 2000                      # Main Rotor Radius in metres
@@ -24,12 +25,21 @@ def Input_Plugger():
     MRA             = np.pi*MRR**2
 
     return Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA
+
+def Pilot_Input_Plugger():
+    theta_0         =10                         # Main Rotor Collective pitch 
+    theta_1s        =2                          # Main Rotor Lateral Cyclic
+    theta_1c        =2                          # Main Rotor Longitudinal Cyclic
+    theta_tail      =8                          # Tail Rotor Collective
+    return theta_0, theta_1s, theta_1c, theta_tail
  
 # Calling the Input_Plugger function to store the values in the following variables
 Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA = Input_Plugger()
+theta_0, theta_1s, theta_1c, theta_tail = Pilot_Input_Plugger
 
 # Creating an instance of these variables to use in other files and classes in the rest of the simulator flow.
-class U_Inputs_Simulator:       # This is the class for the input variables of the flight simulator
+
+class U_Inputs_Simulator:                                                                   # This is the class for the input variables of the flight simulator
     def __init__(self, Altitude: float, MRR: float, TRR: float, V: float, VW: float, 
                  MR_nb: int, TR_nb: int, MR_Taper_ratio: float, TR_Taper_ratio: float, 
                  MR_rc: float, TR_rc: float, MR_root_twist: float, MR_tip_twist: float, 
@@ -57,6 +67,12 @@ class U_Inputs_Simulator:       # This is the class for the input variables of t
         self.MR_omega = MR_omega
         self.MRA      = MRA
 
+class Pilot_Inputs():                                                                       # This is the class for pilot inputs of the flight simulator
+    def __init__(self, theta_0:float, theta_1s:float, theta_1c:float, theta_tail):
+        self.theta_0    = theta_0
+        self.theta_1s   = theta_1s
+        self.theta_1c   = theta_1c
+        self.theta_tail = theta_tail
 
 class U_Inputs_Planner:
     def __init__(self, VW, ):
