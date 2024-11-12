@@ -5,24 +5,6 @@ from Blade_G import Blade                                       # For importing 
 import numpy as np
 
 # I have added the classes for implementing different hover performance prediction methods here
-class MT_Implementor():
-    def __init__(self) -> None:
-        pass
-        
-class BET_Implementor():
-    def __init__(self) -> None:
-        pass
-
-class BEMT_Implementor():
-    def __init__(self) -> None:
-        pass
-
-
-
-
-
-
-
 class Thrust():
     def __init__(self, simulator_inputs=U_Inputs_Simulator):
         
@@ -44,13 +26,27 @@ class Thrust():
         Power=Thrust_hover*self.v
         return Power
 
-       
+    
     def Coefficient_Calculator(self):
         Thrust_hover, _=self.Thrust_Calculator()
         Power=self.Power_Calculator()
         Ct=Thrust_hover/(self.rho*self.A*(self.omega*self.MRR)**2)
         Cp=Power/(self.rho*self.A*(self.omega*self.MRR)**3)
         return Ct, Cp
+    
+    def MT_Implementor():
+    
+        
+    def BET_Implementor():
+    
+
+    def BEMT_Implementor():
+   
+
+
+
+
+
     
 class simulation_data():
     # This class brings together all the force functions written above.
