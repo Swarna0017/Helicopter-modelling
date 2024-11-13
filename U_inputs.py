@@ -23,13 +23,14 @@ def Input_Plugger():
     HS_chord        = 0.09                      # Horizontal stabilizer blade chord
     MR_omega        = 123                       # Enter the RPM of the main rotor blades
     MRA             = np.pi*MRR**2
+    Iterations      = 100                       # the number of iterations for force calculation
 
-    return Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA
+    return Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations 
 
 def Pilot_Input_Plugger():
     theta_0         = 10                         # Main Rotor Collective pitch 
-    theta_1s        = 2                          # Main Rotor Lateral Cyclic
-    theta_1c        = 2                          # Main Rotor Longitudinal Cyclic
+    theta_1s        = 2                          # Main Rotor longitudinal Cyclic
+    theta_1c        = 2                          # Main Rotor lateral Cyclic
     theta_tail      = 8                          # Tail Rotor Collective
     return theta_0, theta_1s, theta_1c, theta_tail
  
@@ -44,7 +45,7 @@ class U_Inputs_Simulator:                                                       
                  MR_nb: int, TR_nb: int, MR_Taper_ratio: float, TR_Taper_ratio: float, 
                  MR_rc: float, TR_rc: float, MR_root_twist: float, MR_tip_twist: float, 
                  TR_root_twist: float, TR_tip_twist: float, MR_chord: float, TR_chord: float, 
-                 HS_chord: float, MR_omega: float, MRA: float):
+                 HS_chord: float, MR_omega: float, MRA: float, Iterations):
         
         self.Altitude = Altitude
         self.MRR = MRR
@@ -66,6 +67,7 @@ class U_Inputs_Simulator:                                                       
         self.HS_chord = HS_chord
         self.MR_omega = MR_omega
         self.MRA      = MRA
+        self.Iterations =Iterations
 
 class Pilot_Inputs():                                                                       # This is the class for pilot inputs of the flight simulator
     def __init__(self, theta_0:float, theta_1s:float, theta_1c:float, theta_tail):
