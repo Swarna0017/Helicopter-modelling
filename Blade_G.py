@@ -41,7 +41,7 @@ class Blade:
 
     def Pitch(self):                                # Generates values of theta based on twist for each r
         F= (self.MR_root_twist-self.MR_tip_twist)/self.MRR*self.radial_sec
-        theta_r=self.theta_0+F*self.radial_sec
+        theta_r=self.MR_theta+F*self.radial_sec
         return theta_r
     
     def Blade_Pitch_dict(self):                     # Creates a dictionary corresponding to blade sections (r) and corresponding pitch (theta)

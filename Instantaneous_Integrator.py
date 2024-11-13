@@ -23,11 +23,13 @@ class BEMT_Implementer():
         self.r          = Blade.Blade_sections(self, 10)
         self.VW         = simulator_inputs.VW
         self.A          = simulator_inputs.MRA
-        self.phi        = Airfoil.Phi(self, self.r)
+        self.phi        = Airfoil.Phi()
         self.range      = simulator_inputs.No_of_iterations
         self.v          = v_data.v_hover(self)
         self.aoa        = Airfoil.AOA(self, self.phi)  
         self.dr         = Blade.dr
+        self.Thrust, self.Torque, self.Power = self.BEMT_Solver()
+        self.Ct, self.Cq, self.Cp = self.Coeff_finder(self.Thrust, self.Torque, self.Power)
 
     def Velocities(self,r):
         Ut = self.omega*r
@@ -43,9 +45,10 @@ class BEMT_Implementer():
         return F
     
     def Coeff_finder(self, Thrust, Torque, Power):
-        Ct = Thrust/(self.rho*self.MRA*(self.MR_omega*self.R)**2)
-        Cq = Torque/(self.rho*self.MRR*self.MRA*(self.MR_omega*self.R)**2)
-        Cp = Power/(self.rho*self.MRA*(self.MR_omega*self.R)**3)
+        Ct = Thrust/(self.rho*self.MRA*(self.MR_omega*self.RmR)**2)
+        Cq = Torque/(self.rho*self.MRR*self.MRA*(self.MR_omega*self.MRR)**2)
+        Cp = Power/(self.rho*self.MRA*(self.MR_omega*self.MRR)**3)
+        return Ct, Cq, Cp
 
     def BEMT_Solver(self):       # Defining a solver for calculating thrust, torque and power 
         self.Thrust     = 0                 # Initializing values
@@ -64,8 +67,10 @@ class BEMT_Implementer():
             self.Thrust+=dT*self.MR_nb
             self.Torque+=dQ*self.MR_nb
         self.P=self.Torque*self.MR_omega
-        Ct, Cq, Cp = self.Coeff_finder(self.Thrust, self.Torque, self.Power)
         return self.Thrust, self.Torque, self.Power
+    
+    
+
 
 
             
