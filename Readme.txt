@@ -40,7 +40,7 @@ B. Code flow
         and moments (all three axes) about the vehicle centric reference frame, accounting for the 
         placement of the components
     11. Cyclic_Integrator.py:
-        Integrates forces and moments about one complete rotation for 
+        Integrates forces and moments about one complete rotation (azimuth circle) for 
         performance computations (thrust, power, moments, etc.)
     12. Instantaneous_Integrator.py:
         Integrates instantaneous forces and moments on individual 
