@@ -53,7 +53,7 @@ C. Variables used:
     1.	Altitude : Flight altitude of the helicopter
     2.	MRR: Main Rotor radius
     3.	TRR: Tail Rotor radius
-    4.	V_inf: Flight velocity
+    4.	V: Climb velocity
     5.	VW: Vehicle Weight
     6.	MR_nb: Main Rotor number of blades
     7.	TR_nb: Tail rotor number of blades
@@ -68,3 +68,5 @@ C. Variables used:
     16.	MR_chord: Main rotor blade chord
     17.	TR_chord: Tail rotor blade chord
     18.	HS_chord: Horizontal stabilizer blade chord
+    19. MR_omega: RPM of the main rotor blades in user inputs
+    10. TR_omega: RPM of the main rotor blades in user inputs
