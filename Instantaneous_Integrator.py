@@ -3,33 +3,73 @@ from U_inputs import U_Inputs_Simulator                         # Specified inpu
 from AirData import Atmosphere                                  # Fetches the required environmental sdata
 from Blade_G import Blade 
 from Airfoil import Airfoil_data                                      # For importing the relevant blade parameters like chord length, taper, etc.
+from Inflow import v_calculator
 import math
+import numpy as np
 
 # All classes for implementing different hover performance prediction methods here
 class BEMT_Implementer():
-    def __init__(self, simulator_inputs=U_Inputs_Simulator, Blade=Blade, Atmosphere_data= Atmosphere, Airfoil=Airfoil_data):
+    def __init__(self, simulator_inputs=U_Inputs_Simulator, Blade=Blade, Atmosphere_data= Atmosphere, Airfoil=Airfoil_data, v_data= v_calculator):
                  
         self.A          = simulator_inputs.A
         self.rho        = Atmosphere_data.rho_calc()
         self.V          = simulator_inputs.V
         self.MRR        = simulator_inputs.MRR
+        self.MRA        = simulator_inputs.MRA
         self.omega      = simulator_inputs.omega
         self.MR_nb      = simulator_inputs.MR_nb
         self.MR_omega   = (simulator_inputs.MR_omega)*math.pi*2/60
-        self.chord_r    = Blade.chord()
+        self.chord_r    = Blade.chord(self)
         self.r          = Blade.Blade_sections(self, 10)
+        self.VW         = simulator_inputs.VW
+        self.A          = simulator_inputs.MRA
+        self.phi        = Airfoil.Phi(self, self.r)
+        self.range      = simulator_inputs.No_of_iterations
+        self.v          = v_data.v_hover(self)
+        self.aoa        = Airfoil.AOA(self, self.phi)  
+        self.dr         = Blade.dr
+
+    def Velocities(self,r):
+        Ut = self.omega*r
+        Up = self.V + self.V
+        return Ut, Up
+    
+    def Prandtl_tip_loss_implemeter(self,r):
+        f =  0.5*self.MR_nb*(self.MRR-r)*self.omega/(self.V+self.v)
+        if(-f>500):
+            F=1
+        else:
+            F=2*np.arccos(np.exp(-f))/np.pi
+        return F
+    
+    def Coeff_finder(self, Thrust, Torque, Power):
+        Ct = Thrust/(self.rho*self.MRA*(self.MR_omega*self.R)**2)
+        Cq = Torque/(self.rho*self.MRR*self.MRA*(self.MR_omega*self.R)**2)
+        Cp = Power/(self.rho*self.MRA*(self.MR_omega*self.R)**3)
+
+    def BEMT_Solver(self):       # Defining a solver for calculating thrust, torque and power 
         self.Thrust     = 0                 # Initializing values
         self.Torque     = 0
         self.Power      = 0
-        self.VW         = simulator_inputs.VW
-        self.A          = simulator_inputs.MRA
-        self.phi        = Airfoil.Phi()
-        self.range      = simulator_inputs.No_of_iterations
+        for i in range(len(self.r)):
+            r = self.r[i]
+            chord = self.chord_r[i]
+            Ut, Up = self.Velocities(r)
+            phi    = self.phi[i]
+            aoa    = self.aoa[i]
+            cl, cd = Airfoil_data.get_ClCd(self, aoa)
+            F      = self.Prandtl_tip_loss_implemeter(r)
+            dT     = 0.5*self.rho*(Ut**2+Up**2)*chord*(cl*np.cos(phi)-cd*np.sin(phi))*self.dr*F
+            dQ     = 0.5*self.rho*(Ut**2+Up**2)*chord*(cl*np.cos(phi)-cd*np.sin(phi))*self.dr*F*r
+            self.Thrust+=dT*self.MR_nb
+            self.Torque+=dQ*self.MR_nb
+        self.P=self.Torque*self.MR_omega
+        Ct, Cq, Cp = self.Coeff_finder(self.Thrust, self.Torque, self.Power)
+        return self.Thrust, self.Torque, self.Power
+
+
+            
         
-
-        def solver(self):                                               # Defining a solver for calculating thrust, forces and moments
-            self.v = -self.V*0.5 + math.sqrt((self.V*0.5)**2+(self.VW/(2*self.rho*self.A)))                 # Induced velocity
-
 
 
 

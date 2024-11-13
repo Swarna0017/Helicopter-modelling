@@ -31,10 +31,11 @@ class Blade:
         self.pitch_values   = self.Pitch()
         r_theta_values      = self.Blade_Pitch_dict()
         r_chord_values      = self.Blade_Chord_dict()
+        self.dr             = (self.MRR-self.MR_rc)/10
 
 
 
-    def Blade_sections(self, no_of_sections=100):
+    def Blade_sections(self, no_of_sections):
         radial_sec=[self.MR_rc+i*(self.MRR-self.MR_rc)/(no_of_sections-1) for i in range (no_of_sections)]
         return radial_sec
 
