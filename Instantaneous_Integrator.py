@@ -1,5 +1,5 @@
 # This file computes the forces and moments on individual blades.
-from U_inputs import U_Inputs_Simulator                         # Specified input files are called from here
+from U_inputs import U_Inputs_Simulator, Pilot_Inputs                         # Specified input files are called from here
 from AirData import Atmosphere                                  # Fetches the required environmental sdata
 from Blade_G import Blade 
 from Airfoil import Airfoil_data                                      # For importing the relevant blade parameters like chord length, taper, etc.
@@ -9,27 +9,36 @@ import numpy as np
 
 # All classes for implementing different hover performance prediction methods here
 class BEMT_Implementer():
-    def __init__(self, simulator_inputs=U_Inputs_Simulator, Blade=Blade, Atmosphere_data= Atmosphere, Airfoil=Airfoil_data, v_data= v_calculator):
-                 
-        self.A          = simulator_inputs.A
+    def __init__(self, simulator_inputs=U_Inputs_Simulator, pilot_inputs=Pilot_Inputs, Blade=Blade, Atmosphere_data= Atmosphere, Airfoil=Airfoil_data, v_data= v_calculator):
+        self.rho_0      = 1.225             #kg/m^3   
+        Atmosphere_data = Atmosphere(simulator_inputs, rho_0=1.225, T_0=298, P_0=101325, Temp_grad=-6.5e-3)
+        Blade = Blade(simulator_inputs=simulator_inputs, pilot_inputs=pilot_inputs)     
+        self.simulator_inputs=simulator_inputs
+        self.pilot_inputs=Pilot_Inputs 
         self.rho        = Atmosphere_data.rho_calc()
         self.V          = simulator_inputs.V
         self.MRR        = simulator_inputs.MRR
         self.MRA        = simulator_inputs.MRA
-        self.omega      = simulator_inputs.omega
+        self.omega      = simulator_inputs.MR_omega
         self.MR_nb      = simulator_inputs.MR_nb
+        self.MR_rc      = simulator_inputs.MR_rc
         self.MR_omega   = (simulator_inputs.MR_omega)*math.pi*2/60
-        self.chord_r    = Blade.chord(self)
-        self.r          = Blade.Blade_sections(self, 10)
+        self.r          = Blade.Blade_sections(10)
+        self.chord_r    = Blade.chord()
         self.VW         = simulator_inputs.VW
         self.A          = simulator_inputs.MRA
-        self.phi        = Airfoil.Phi()
+        self.phi        = Airfoil.Phi(self)
         self.range      = simulator_inputs.No_of_iterations
-        self.v          = v_data.v_hover(self)
+        self.v_data      = v_data(Blade, simulator_inputs)  # Creating an instance of v_calculator
+        self.v           = self.v_data.v_hover()  # Accessing v_hover from the instance
         self.aoa        = Airfoil.AOA(self, self.phi)  
         self.dr         = Blade.dr
+        self.MR_chord   = simulator_inputs.MR_chord
+
         self.Thrust, self.Torque, self.Power = self.BEMT_Solver()
         self.Ct, self.Cq, self.Cp = self.Coeff_finder(self.Thrust, self.Torque, self.Power)
+        print(f"T={self.Thrust}/nQ={self.Torque}/nP={self.Power}")
+        print(f"Ct={self.Ct}/nCq={self.Cq}/nCp={self.Cp}")
 
     def Velocities(self,r):
         Ut = self.omega*r
@@ -68,6 +77,7 @@ class BEMT_Implementer():
             self.Torque+=dQ*self.MR_nb
         self.P=self.Torque*self.MR_omega
         return self.Thrust, self.Torque, self.Power
+    
     
     
 

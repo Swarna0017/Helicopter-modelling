@@ -16,12 +16,12 @@ class Airfoil_data:
         self.rho    = Atmosphere_data.rho_calc()
         self.A      = simulator_inputs.MRA
         self.theta  = Blade.Pitch(self)
-        self.v      = v_calculator.v_hover()
+        self.v      = self.v_data.v_hover()
         self.phi    = self.Phi(self)
         self.aoa    = self.AOA(self)
     
     def Phi(self):
-        self.phi=[(np.arctan((self.V+self.v/self.omega*r))) for r in self.r]
+        self.phi=[(np.arctan((self.V+self.v)/self.omega*r)) for r in self.r]
         return self.phi
     
     def AOA(self):
