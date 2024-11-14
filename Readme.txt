@@ -48,7 +48,7 @@ B. Code flow
         blade location to give answers.
 
 C. Variables used:
-    # Following is the list of all the variables used throughout the code (for clarity):
+    # Following is the list of all the major variables used throughout the code (for clarity):
     # Tip: All main rotor variables begin with MR, all tail rotor variables, similarly, begin with TR
     1.	Altitude : Flight altitude of the helicopter
     2.	MRR: Main Rotor radius
@@ -70,3 +70,8 @@ C. Variables used:
     18.	HS_chord: Horizontal stabilizer blade chord
     19. MR_omega: RPM of the main rotor blades in user inputs
     10. TR_omega: RPM of the main rotor blades in user inputs
+    11. Cd_body: Coefficient of drag for the helicopter
+    12. body_area: Effective area of the helicopter contributing to drag
+    13. alpha_tpp: Angle made my tip path plane with the relative wind
+    14. psi: azimuthal angle 
+    15. v/vi: induced velocity
