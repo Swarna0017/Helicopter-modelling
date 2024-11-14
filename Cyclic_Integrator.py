@@ -43,7 +43,7 @@ class Forward_flight_analyzer():
         return (alpha_tpp)
     
     def Sectional_load_calc(self):
-
+        
 
 
 
