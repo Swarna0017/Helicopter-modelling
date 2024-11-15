@@ -35,12 +35,12 @@ mission_inputs= U_Inputs_Planner(VW, Altitude, SFC, FW)
 atmosphere=Atmosphere(simulator_inputs, pilot_inputs)
 
 # Initialize BEMT_Implementer with the simulator_inputs instance
-bemt = BEMT_Implementer(simulator_inputs=simulator_inputs, pilot_inputs=pilot_inputs)
-hover_climb = Hover_Climb(simulator_inputs, mission_inputs, atmosphere, blade)
-Power_Outputs=hover_climb.Power_Outputs(simulator_inputs, mission_inputs, atmosphere, blade)
-Power_vs_Alt = hover_climb.Power_vs_Alt(simulator_inputs, mission_inputs, atmosphere, blade)
-RC_vs_Alt = hover_climb.RC_vs_Alt(simulator_inputs, mission_inputs, atmosphere, blade)
-RC_vs_Weight = hover_climb.RC_vs_weight(simulator_inputs, mission_inputs, atmosphere, blade)
+bemt            = BEMT_Implementer(simulator_inputs=simulator_inputs, pilot_inputs=pilot_inputs)
+hover_climb     = Hover_Climb(simulator_inputs, mission_inputs, atmosphere, blade)
+Power_Outputs   = hover_climb.Power_Outputs(simulator_inputs, mission_inputs, atmosphere, blade)
+Power_vs_Alt    = hover_climb.Power_vs_Alt(simulator_inputs, mission_inputs, atmosphere, blade)
+RC_vs_Alt       = hover_climb.RC_vs_Alt(simulator_inputs, mission_inputs, atmosphere, blade)
+RC_vs_Weight    = hover_climb.RC_vs_weight(simulator_inputs, mission_inputs, atmosphere, blade)
 
 
 
