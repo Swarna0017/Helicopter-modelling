@@ -4,6 +4,7 @@
 # Outputs:: Chord length, pitch angle
 # from Airfoil import Airfoil
 from U_inputs import U_Inputs_Simulator, Pilot_Inputs
+import math
 
 
 
@@ -32,8 +33,10 @@ class Blade:
         r_theta_values      = self.Blade_Pitch_dict()
         r_chord_values      = self.Blade_Chord_dict()
         self.dr             = (self.MRR-self.MR_rc)/10
-
-
+    
+    def Disk_solidity(self):
+        solidity=(self.MR_chord*self.MRR)/(math.pi*self.MRR**2)
+        return solidity
 
     def Blade_sections(self, no_of_sections):
         radial_sec=[self.MR_rc+i*(self.MRR-self.MR_rc)/(no_of_sections-1) for i in range (no_of_sections)]
