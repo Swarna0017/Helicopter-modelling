@@ -4,22 +4,22 @@ import numpy as np
 
 def Input_Plugger():
     Altitude        = 2000                      # Geometric altitude in metres
-    MRR             = 2000                      # Main Rotor Radius in metres
-    TRR             = 12                        # Tail Rotor Radius in meters
+    MRR             = 0.762                         # Main Rotor Radius in metres
+    TRR             = 0.5                       # Tail Rotor Radius in meters
     V               = 100                       # Flight (climb) velocity in m/s
     VW              = 50                        # Weight of the vehicle in kg
     MR_nb           = 3                         # Number of main rotor blades
     TR_nb           = 2                         # Number of Tail Rotor blades
     MR_Taper_ratio  = 0.8                       # Enter the taper ratio of the main rotor blades
     TR_Taper_ratio  = 0.8                       # Taper ratio of tail rotor blades
-    MR_rc           = 0.78                      # Enter the root cut-out of main rotor blade
+    MR_rc           = 0.125                      # Enter the root cut-out of main rotor blade
     TR_rc           = 0.1                       # Enter the root cut-out of tail rotor blade
     MR_root_twist   = 4                         # Enter the twist of main rotor blade root
     MR_tip_twist    = 0                         # Enter the twist of main rotor blade tip
     TR_root_twist   = 4                         # Enter the twist of tail rotor blade root
     TR_tip_twist    = 0                         # Enter the twist of tail rotor blade tip
-    MR_chord        = 0.07                      # Main rotor blade chord
-    TR_chord        = 0.09                      # Tail rotor blade chord
+    MR_chord        = 0.0508                      # Main rotor blade chord
+    TR_chord        = 0.2                     # Tail rotor blade chord
     HS_chord        = 0.09                      # Horizontal stabilizer blade chord
     MR_omega        = 123                       # Enter the RPM of the main rotor blades
     MRA             = np.pi*MRR**2
@@ -32,9 +32,9 @@ def Input_Plugger():
 
 def Pilot_Input_Plugger():
     theta_0         = 10                         # Main Rotor Collective pitch 
-    theta_1s        = 2                          # Main Rotor longitudinal Cyclic
-    theta_1c        = 2                          # Main Rotor lateral Cyclic
-    theta_tail      = 8                          # Tail Rotor Collective
+    theta_1s        = 0                          # Main Rotor longitudinal Cyclic
+    theta_1c        = 0                          # Main Rotor lateral Cyclic
+    theta_tail      = 0                          # Tail Rotor Collective
     return theta_0, theta_1s, theta_1c, theta_tail
  
 # Calling the Input_Plugger function to store the values in the following variables

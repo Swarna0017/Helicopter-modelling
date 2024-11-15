@@ -11,7 +11,7 @@ class v_calculator:
         self.VW     = simulator_inputs.VW
 
 
-        def v_hover(self):
-            v = -self.V*0.5 + math.sqrt((self.V*0.5)**2+(self.VW/(2*self.rho*self.A)))                 # Induced velocity for hover, Momentum theory
-            return v
+    def v_hover(self):
+        v = -self.V*0.5 + math.sqrt((self.V*0.5)**2+(self.VW/(2*self.rho*self.A)))                 # Induced velocity for hover, Momentum theory
+        return v
         

@@ -1,193 +1,231 @@
 # The GUI appends here 
-
-import tkinter as tk 
-from tkinter import ttk
-from PIL import Image, ImageTk
-import numpy as np
-
-from U_inputs import Input_Plugger, Pilot_Input_Plugger
-
-# Define the function to gather user inputs
-def get_user_inputs():
-    user_inputs = {
-        'Altitude'        : float(altitude_Entry.get()),
-        'MRR'             : float(main_radius_Entry.get()),
-        'TRR'             : float(tail_radius_Entry.get()),
-        'V'               : float(velocity_Entry.get()),
-        'VW'              : float(weight_Entry.get()),
-        'MR_nb'           : int(main_nublades_Entry.get()),
-        'TR_nb'           : int(tail_nublades_Entry.get()),
-        'MR_Taper_ratio'  : float(main_taper_Entry.get()),
-        'TR_Taper_ratio'  : float(tail_taper_Entry.get()),
-        'MR_rc'           : float(main_rootcut_Entry.get()),
-        'TR_rc'           : float(tail_rootcut_Entry.get()),
-        'MR_root_twist'   : float(main_root_twist_Entry.get()),
-        'MR_tip_twist'    : float(main_tip_twist_Entry.get()),
-        'TR_root_twist'   : float(tail_root_twist_Entry.get()),
-        'TR_tip_twist'    : float(tail_tip_twist_Entry.get()),
-        'MR_chord'        : float(main_chord_Entry.get()),
-        'TR_chord'        : float(tail_chord_Entry.get()),
-        'HS_chord'        : float(horizontal_chord_Entry.get()),
-        'MR_omega'        : float(main_omega_Entry.get()),
-        'MRA'             : float(body_area_Entry.get()),
-        'Iterations'      : int(iterations_Entry.get()),
-        'Cd_body'         : float(drag_coefficient_Entry.get()),
-        'body_area'       : float(body_area_Entry.get())
-    }
-    print(user_inputs)  # Debugging line
-    return user_inputs
-
-def get_pilot_inputs():
-    pilot_inputs = {
-        'theta_0'         : float(collective_Entry.get()),
-        'theta_1s'        : float(cyclic_longitudinal_Entry.get()),
-        'theta_1c'        : float(cyclic_lateral_Entry.get()),
-        'theta_tail'      : float(tail_collective_Entry.get())
-    }
-    print(pilot_inputs)  # Debugging line
-    return pilot_inputs
-
-# Main window
-root = tk.Tk()
-root.title("Helicopter Flight Simulator")
-
-image = Image.open("bgimg.jpeg")
-image_width, image_height = image.size
-root.geometry(f"{image_width}x{image_height}")
-photo = ImageTk.PhotoImage(image)
-root.photo = photo  
-canvas = tk.Canvas(root, width=image_width, height=image_height)
-canvas.grid(row=0, column=0, rowspan=100, columnspan=20)  
-canvas.create_image(0, 0, image=photo, anchor='nw')
+# Inputs: 
+#    1. user inputs from the U_inputs file
+#    2. Pilot inputs from the GUI or the pilot inputs file
+# Outputs: Plots obtained on the GUI.
 
 
-tk.Label(root, text="FLIGHT SIMULATOR", font=("Times New Roman", 18, "bold")).grid(row=1, column=0, columnspan=2, pady=10)
 
-tk.Label(root, text="A. Main Rotor Inputs:", font=("Arial", 14, "bold")).grid(row=2, column=0, columnspan=2, pady=10)
+import tkinter as tk                                 # Importing tkinter library for GUI development
+from tkinter import messagebox                       # Importing messagebox from tkinter for displaying alerts
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # Importing FigureCanvasTkAgg for embedding matplotlib plots in tkinter
+import matplotlib.pyplot as plt                      # Importing matplotlib for plotting graphs
+from PIL import Image, ImageTk                       # Importing Image and ImageTk from PIL to handle image processing
 
-tk.Label(root, text="Main Rotor Radius").grid(row=6, column=0)
-main_radius_Entry = ttk.Entry(root)
-main_radius_Entry.grid(row=6, column=1)
 
-tk.Label(root, text="Main Rotor Number of Blades").grid(row=7, column=0)
-main_nublades_Entry = ttk.Entry(root)
-main_nublades_Entry.grid(row=7, column=1)
+""" Import your functions data here, from your_file_name import your_class_name_in_file. If the functions are  
+written using non-oops concept, you try with this command from your_file_name import * """
+from Instantaneous_Integrator import BEMT_Implementer            # Replacing the dummy data function with functions written in instantaneous integrator.
+from U_inputs import *
 
-tk.Label(root, text="Main Rotor Taper Ratio").grid(row=8, column=0)
-main_taper_Entry = ttk.Entry(root)
-main_taper_Entry.grid(row=8, column=1)
+# Flight_Simulator.py or main initialization file
 
-tk.Label(root, text="Main Rotor Root Cutout").grid(row=9, column=0)
-main_rootcut_Entry = ttk.Entry(root)
-main_rootcut_Entry.grid(row=9, column=1)
+# Unpack values
+Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area = Input_Plugger()
+theta_0, theta_1s, theta_1c, theta_tail = Pilot_Input_Plugger()
 
-tk.Label(root, text="Main Rotor Twist (Root)").grid(row=10, column=0)
-main_root_twist_Entry = ttk.Entry(root)
-main_root_twist_Entry.grid(row=10, column=1)
+# Create instance of U_Inputs_Simulator
+simulator_inputs = U_Inputs_Simulator(Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, 
+                                      MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, 
+                                      MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area)
+pilot_inputs = Pilot_Inputs(theta_0, theta_1s, theta_1c, theta_tail)
 
-tk.Label(root, text="Main Rotor Twist (Tip)").grid(row=11, column=0)
-main_tip_twist_Entry = ttk.Entry(root)
-main_tip_twist_Entry.grid(row=11, column=1)
+# Initialize BEMT_Implementer with the simulator_inputs instance
+bemt = BEMT_Implementer(simulator_inputs=simulator_inputs, pilot_inputs=pilot_inputs)
 
-tk.Label(root, text="Main Rotor Chord").grid(row=12, column=0)
-main_chord_Entry = ttk.Entry(root)
-main_chord_Entry.grid(row=12, column=1)
 
-tk.Label(root, text="Main Rotor RPM").grid(row=13, column=0)
-main_omega_Entry = ttk.Entry(root)
-main_omega_Entry.grid(row=13, column=1)
+# root = tk.Tk()                                       # Creating the main window for the application
+# """ Change SimulationData() class to your respective class """
+# sim_data = BEMT_Implementer                          # Creating an instance of the SimulationData class
+# plots_data = {}                                      # Initialize a dictionary to store data for the plots
+# graph_var1 = tk.StringVar(value="Forces X")          # Creating a StringVar to hold the selected graph type for the first plot
+# graph_var2 = tk.StringVar(value="Moments X")         # Creating a StringVar to hold the selected graph type for the second plot
+# auto_run = tk.BooleanVar(value=False)                # Creating a BooleanVar to hold the state of the auto-run checkbox
 
-# Tail rotor I/P parameters
-tk.Label(root, text="B. Tail Rotor Inputs:", font=("Arial", 14, "bold")).grid(row=15, column=0, columnspan=2, pady=10)
+# """ This is the important function where you are connecting your defined force and moment functions """
+# def run_simulation():
+#     #Runs simulation and update plots
+#     try:
+#         # Get values from sliders
+#         collective_pitch = float(collective_pitch_entry.get())
+#         lateral_pitch = float(lateral_pitch_entry.get())
+#         longitudinal_pitch = float(longitudinal_pitch_entry.get())
+#         tail_rotor_collective = float(tail_rotor_collective_entry.get())
 
-tk.Label(root, text="Tail Rotor Radius").grid(row=16, column=0)
-tail_radius_Entry = ttk.Entry(root)
-tail_radius_Entry.grid(row=16, column=1)
+#         """ Connect your functions here properly, in this example, sim_dat.generate_force_x is function called from sim_data class named generate_force_x
+#          which can take the inputs(arguments) of collective_pitch, lateral_pitch, longitudinal_pitch and tail_rotor_collective """
+#         # Generates simulation data for different forces and moments
+#         plots_data["Forces X"] = sim_data.generate_forces_x(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
+#         plots_data["Forces Y"] = sim_data.generate_forces_y(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
+#         plots_data["Forces Z"] = sim_data.generate_forces_z(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
+#         plots_data["Forces XYZ"] = sim_data.generate_forces_xyz(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
+#         plots_data["Moments X"] = sim_data.generate_moments_x(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
+#         plots_data["Moments Y"] = sim_data.generate_moments_y(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
+#         plots_data["Moments Z"] = sim_data.generate_moments_z(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
+#         plots_data["Moments XYZ"] = sim_data.generate_moments_xyz(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
 
-tk.Label(root, text="Tail Rotor Number of Blades").grid(row=17, column=0)
-tail_nublades_Entry = ttk.Entry(root)
-tail_nublades_Entry.grid(row=17, column=1)
+#         # Update the plots with the new data
+#         update_plot(ax1, canvas1, graph_var1.get(),plots_data)
+#         update_plot(ax2, canvas2, graph_var2.get(), plots_data)
 
-tk.Label(root, text="Tail Rotor Taper Ratio").grid(row=18, column=0)
-tail_taper_Entry = ttk.Entry(root)
-tail_taper_Entry.grid(row=18, column=1)
+#     except ValueError:
+#         messagebox.showerror("Invalid Input", "Please ensure all input fields are filled with valid numbers.")  # Show error if inputs are invalid
 
-tk.Label(root, text="Tail Rotor Root Cutout").grid(row=19, column=0)
-tail_rootcut_Entry = ttk.Entry(root)
-tail_rootcut_Entry.grid(row=19, column=1)
 
-tk.Label(root, text="Tail Rotor Twist (Root)").grid(row=20, column=0)
-tail_root_twist_Entry = ttk.Entry(root)
-tail_root_twist_Entry.grid(row=20, column=1)
 
-tk.Label(root, text="Tail Rotor Twist (Tip)").grid(row=21, column=0)
-tail_tip_twist_Entry = ttk.Entry(root)
-tail_tip_twist_Entry.grid(row=21, column=1)
+# """ Don't change anything from here """
+# def create_row(frame, from_, to, label_text, rel_y):
+#     #Creating a row with a label, entry, and slider using relative positioning
+#     label = tk.Label(frame, text=label_text)                          # Creating a label with specified text
+#     label.place(relx=0.05, rely=rel_y, relwidth=0.2, relheight=0.05)  # Position the label using relative positioning
 
-tk.Label(root, text="Tail Rotor Chord").grid(row=22, column=0)
-tail_chord_Entry = ttk.Entry(root)
-tail_chord_Entry.grid(row=22, column=1)
+#     entry = tk.Entry(frame)                                           # Creating an entry widget for user input
+#     entry.place(relx=0.3, rely=rel_y, relwidth=0.1, relheight=0.05)   # Position the entry widget
 
-# Miscellaneous section for other inputs
-tk.Label(root, text="C. Miscellaneous Inputs:", font=("Arial", 14, "bold")).grid(row=8, column=6, columnspan=2, pady=10)
+#     # Creating a slider (Scale) widget with specified range and orientation, updates entry when slider is moved
+#     slider = tk.Scale(frame, from_=from_, to=to, orient=tk.HORIZONTAL, resolution=0.001,command=lambda v: update_entry_from_slider(v, entry))
+#     slider.place(relx=0.5, rely=rel_y-0.05, relwidth=0.4, relheight=0.15)  # Position the slider
 
-tk.Label(root, text="Altitude").grid(row=9, column=6)
-altitude_Entry = ttk.Entry(root)
-altitude_Entry.grid(row=9, column=7)
+#     # Creating labels to display the minimum and maximum values at the ends of the slider
+#     min_label = tk.Label(frame, text=f"{from_:.3f}")                        # Label for minimum value
+#     min_label.place(relx=0.45, rely=rel_y , relwidth=0.05, relheight=0.05)  # Position the minimum value label
 
-tk.Label(root, text="Flight Velocity").grid(row=10, column=6)
-velocity_Entry = ttk.Entry(root)
-velocity_Entry.grid(row=10, column=7)
+#     max_label = tk.Label(frame, text=f"{to:.3f}")                           # Label for maximum value
+#     max_label.place(relx=0.9, rely=rel_y , relwidth=0.05, relheight=0.05)   # Position the maximum value label
 
-tk.Label(root, text="Vehicle Weight").grid(row=11, column=6)
-weight_Entry = ttk.Entry(root)
-weight_Entry.grid(row=11, column=7)
+#     entry.bind("<Return>", lambda event: update_slider_from_entry(entry, slider))  # Bind Return key to update slider when entry is changed
+#     slider.bind("<Motion>", lambda event: check_auto_run())                        # Bind slider movement to check auto-run functionality
 
-tk.Label(root, text="Iterations").grid(row=12, column=6)
-iterations_Entry = ttk.Entry(root)
-iterations_Entry.grid(row=12, column=7)
+#     return entry, slider  # Return the entry and slider for further use
 
-tk.Label(root, text="Drag Coefficient").grid(row=13, column=6)
-drag_coefficient_Entry = ttk.Entry(root)
-drag_coefficient_Entry.grid(row=13, column=7)
+# def update_entry_from_slider(var, entry):
+#     # Update entry field when slider is moved
+#     entry.delete(0, tk.END)    # Clear the entry field
+#     entry.insert(0, str(var))  # Insert the slider value into the entry field
 
-tk.Label(root, text="Body Area").grid(row=14, column=6)
-body_area_Entry = ttk.Entry(root)
-body_area_Entry.grid(row=14, column=7)
+# def update_slider_from_entry(entry, slider):
+#     # Update slider position when entry is changed
+#     try:
+#         value = float(entry.get())  # Get the value from the entry field and convert it to float
+#         slider.set(value)           # Set the slider position to the entry value
+#     except ValueError:
+#         messagebox.showerror("Invalid Input", "Please enter a valid number.")  # Show error message if input is invalid
 
-tk.Label(root, text="Horizontal Stabilizer Chord").grid(row=15, column=6)
-horizontal_chord_Entry = ttk.Entry(root)
-horizontal_chord_Entry.grid(row=15, column=7)
+# def check_auto_run():
+#     # Auto-run simulation if enabled
+#     if auto_run.get():    # Check if auto-run is enabled
+#         run_simulation()  # Run the simulation
 
-# Pilot controls section
-tk.Label(root, text="D. Pilot Inputs:", font=("Arial", 16, "bold")).grid(row=2, column=6, columnspan=2, pady=10)
+# def auto_run_toggle():
+#     # Toggle auto-run functionality
+#     if auto_run.get():    # Check if auto-run is enabled
+#         run_simulation()  # Run the simulation
 
-tk.Label(root, text="Main Rotor Collective").grid(row=3, column=6)
-collective_Entry = ttk.Entry(root)
-collective_Entry.grid(row=3, column=7)
+# # def update_plot(ax, canvas, graph_type):
+# #     # Update plot based on selected graph type
+# #     ax.clear()                         # Clear the current plot
+# #     if graph_type in plots_data:       # Check if the selected graph type is in the data
+# #         x, y = plots_data[graph_type]  # Get the x and y data for the selected graph type
+# #         ax.plot(x, y, label=graph_type)# Plot the data
+# #     ax.set_title(graph_type)           # Set the plot title to the selected graph type
+# #     ax.legend()                        # Display the legend
+# #     canvas.draw()                      # Refresh the canvas to show the updated plot
 
-tk.Label(root, text="Longitudinal Cyclic (Main Rotor)").grid(row=4, column=6)
-cyclic_longitudinal_Entry = ttk.Entry(root)
-cyclic_longitudinal_Entry.grid(row=4, column=7)
+# def update_plot(ax, canvas, graph_type, plots_data):
+#     """
+#     Update the plot based on the selected graph type.
 
-tk.Label(root, text="Lateral Cyclic (Main Rotor)").grid(row=5, column=6)
-cyclic_lateral_Entry = ttk.Entry(root)
-cyclic_lateral_Entry.grid(row=5, column=7)
+#     Parameters:
+#     - ax: The axes of the plot.
+#     - canvas: The canvas to draw the plot on.
+#     - graph_type: The type of graph to display.
+#     - plots_data: A dictionary containing the data for different graph types.
+#     """
+#     ax.clear()  # Clear the current plot
 
-tk.Label(root, text="Tail Rotor Collective").grid(row=6, column=6)
-tail_collective_Entry = ttk.Entry(root)
-tail_collective_Entry.grid(row=6, column=7)
+#     if graph_type in plots_data:
+#         data = plots_data[graph_type]  # Get the data for the selected graph type
 
-# Submit Button to get inputs
-def on_submit():
-    user_inputs = get_user_inputs()
-    pilot_inputs = get_pilot_inputs()
-    # Here you can pass these inputs to the simulator or store them for later use
-    print("User Inputs:", user_inputs)
-    print("Pilot Inputs:", pilot_inputs)
+#         if len(data) == 2:  # Single y data case
+#             x, y = data
+#             ax.plot(x, y, label=graph_type)
+#         elif len(data) == 4:  # Separate x, y, z components case
+#             x, force_x, force_y, force_z = data
+#             ax.plot(x, force_x, label=f'{graph_type} - X')
+#             ax.plot(x, force_y, label=f'{graph_type} - Y')
+#             ax.plot(x, force_z, label=f'{graph_type} - Z')
+#         else:
+#             raise ValueError("Unexpected data format for plotting")
 
-submit_button = ttk.Button(root, text="Submit", command=lambda:on_submit)
-submit_button.grid(row=16, column=6, columnspan=8, pady=10)
+#     ax.set_title(graph_type)  # Set the plot title to the selected graph type
+#     ax.legend()  # Display the legend
+#     canvas.draw()  # Refresh the canvas to show the updated plot
 
-root.mainloop()
 
+# def reset_fields():
+#     # Reset all fields and clear plots
+#     collective_pitch_slider.set(0)     # Reset collective pitch slider to 0
+#     lateral_pitch_slider.set(0)        # Reset lateral pitch slider to 0
+#     longitudinal_pitch_slider.set(0)   # Reset longitudinal pitch slider to 0
+#     tail_rotor_slider.set(0)           # Reset tail rotor slider to 0
+#     ax1.clear()                        # Clear the first plot
+#     ax2.clear()                        # Clear the second plot
+#     canvas1.draw()                     # Refresh the first canvas
+#     canvas2.draw()                     # Refresh the second canvas
+
+# # GUI Setup
+# root.title("Rotary Wing Aerodynamics - Helicopter Flight Simulator")  # Set the window title
+# root.geometry("1600x1000")              # Set the initial window size
+# root.state('zoomed')                   # Maximize the window
+
+# # Load and display image
+# image = Image.open("heli1.jpg")        # Open the image file
+# photo = ImageTk.PhotoImage(image)      # Convert the image to a PhotoImage object for tkinter
+# image_label = tk.Label(root, image=photo)  # Creating a label widget to hold the image
+# image_label.place(relx=0.02, rely=0.05, relwidth=0.45, relheight=0.4)  # Position the image label
+
+# main_frame = tk.Frame(root)            # Creating a frame for input controls
+# main_frame.place(relx=0.02, rely=0.55, relwidth=0.45, relheight=0.4)  # Position the main frame
+
+# # Creating rows for sliders
+# collective_pitch_entry, collective_pitch_slider = create_row(main_frame, -20, 20, "Collective Pitch (°)", 0.05)
+# lateral_pitch_entry, lateral_pitch_slider = create_row(main_frame, -20, 20, "Lateral Cyclic Pitch (°)", 0.15)
+# longitudinal_pitch_entry, longitudinal_pitch_slider = create_row(main_frame, -20, 20, "Longitudinal Cyclic Pitch (°)", 0.25)
+# tail_rotor_collective_entry, tail_rotor_slider = create_row(main_frame, -20, 20, "Tail Rotor Collective (°)", 0.35)
+
+# # Auto-run and reset buttons
+# auto_run_button = tk.Checkbutton(main_frame, text="Auto-Run", variable=auto_run, command=auto_run_toggle)  # Creating auto-run toggle button
+# auto_run_button.place(relx=0.4, rely=0.85, relwidth=0.2, relheight=0.06)                                  # Position the auto-run button
+
+# run_button = tk.Button(main_frame, text="Run Simulation", command=run_simulation)                          # Creating button to run simulation
+# run_button.place(relx=0.05, rely=0.85, relwidth=0.2, relheight=0.06)                                        # Position the run button
+
+# reset_button = tk.Button(main_frame, text="Reset", command=reset_fields)                                   # Creating button to reset fields
+# reset_button.place(relx=0.75, rely=0.85, relwidth=0.2, relheight=0.06)                                     # Position the reset button
+
+# # Dropdowns for selecting graphs
+# graph_dropdown1_label = tk.Label(main_frame, text="Select Graph for Window 1:")                            # Creating label for first graph dropdown
+# graph_dropdown1_label.place(relx=0.0, rely=0.5, relwidth=0.3, relheight=0.06)                            # Position the label
+# graph_dropdown1 = tk.OptionMenu(main_frame, graph_var1, "Forces X", "Forces Y", "Forces Z", "Forces XYZ", command=lambda _: update_plot(ax1, canvas1, graph_var1.get(),plots_data))  # Creating dropdown menu for first plot selection
+# graph_dropdown1.place(relx=0.45, rely=0.5, relwidth=0.5, relheight=0.06)                                  # Position the first dropdown menu
+
+# graph_dropdown2_label = tk.Label(main_frame, text="Select Graph for Window 2:")                            # Creating label for second graph dropdown
+# graph_dropdown2_label.place(relx=0.0, rely=0.6, relwidth=0.3, relheight=0.06)                            # Position the label
+# graph_dropdown2 = tk.OptionMenu(main_frame, graph_var2, "Moments X", "Moments Y", "Moments Z", "Moments XYZ", command=lambda _: update_plot(ax2, canvas2, graph_var2.get(), plots_data))  # Creating dropdown menu for second plot selection
+# graph_dropdown2.place(relx=0.45, rely=0.6, relwidth=0.5, relheight=0.06)                                  # Position the second dropdown menu
+
+# # Frames for plots
+# plot_frame_1 = tk.Frame(root)                                                                              # Creating frame for the first plot
+# plot_frame_1.place(relx=0.5, rely=0.05, relwidth=0.45, relheight=0.4)                                      # Position the first plot frame
+# fig1, ax1 = plt.subplots()                                                                                 # Creating a matplotlib figure and axis for the first plot
+# canvas1 = FigureCanvasTkAgg(fig1, master=plot_frame_1)                                                     # Creating a canvas widget to hold the first plot
+# canvas1.get_tk_widget().pack(fill=tk.BOTH, expand=True)                                                    # Pack the canvas in the frame
+
+# plot_frame_2 = tk.Frame(root)                                                                              # Creating frame for the second plot
+# plot_frame_2.place(relx=0.5, rely=0.55, relwidth=0.45, relheight=0.4)                                      # Position the second plot frame
+# fig2, ax2 = plt.subplots()                                                                                 # Creating a matplotlib figure and axis for the second plot
+# canvas2 = FigureCanvasTkAgg(fig2, master=plot_frame_2)                                                     # Creating a canvas widget to hold the second plot
+# canvas2.get_tk_widget().pack(fill=tk.BOTH, expand=True)                                                    # Pack the canvas in the frame
+
+# # Main loop
+# root.mainloop()  # Start the Tkinter event loop to run the application

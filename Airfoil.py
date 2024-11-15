@@ -30,7 +30,7 @@ class Airfoil_data:
 
     def get_ClCd(self, aoa):
         cl = [5.75*aoa for aoa in self.aoa]
-        cd = [0.013+1.25*aoa**2 for aoa in self.aoa]                 # Taking the sample/test case
+        cd = [0.0113+1.25*aoa**2 for aoa in self.aoa]                 # Taking the sample/test case
         return cl, cd
 
     
