@@ -18,6 +18,7 @@ class Atmosphere():
         self.T_0  = T_0 
         self.P_0     = P_0 
         self.Temp_grad = Temp_grad
+        self.T1 = self.T_0+self.Temp_grad*self.alt
     
     def T1_calc(self):
         T1 = self.T_0+self.Temp_grad*self.alt
