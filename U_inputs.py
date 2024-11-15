@@ -26,7 +26,7 @@ def Input_Plugger():
     Iterations      = 100                       # the number of iterations for force calculation
     Cd_body         = 0.3                       # Enter the body drag coefficient for your helicopter, if unknown, use the following reference: 
     body_area       = 2  # (fuselage body area) # Cd = 0.2 to 0.4 for small helicopters, 0.3 to 0.5 for medium helicpters, 0.4 to 0.6 for militray helicopters, and 0.15 to 0.25 for highly streamlined models
-    SFC             = 0.36                      # Specific fuel consumption, used in the planner
+    SFC             = 0.36/1000                 # Specific fuel consumption, used in the planner
     FW              = 10                        # Fuel weight (used in the planner)
     return Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW
 

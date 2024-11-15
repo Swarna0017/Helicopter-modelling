@@ -13,7 +13,7 @@ class Hover_Climb():
     def __init__(self, simulator_inputs: U_Inputs_Simulator, mission_inputs: U_Inputs_Planner, atmosphere: Atmosphere, blade: Blade):
         self.VW=mission_inputs.VW
         self.FW=mission_inputs.FW
-        self.altitude=simulator_inputs.Altitude
+        self.Altitude=simulator_inputs.Altitude
         self.rho=atmosphere.rho_calc()
         self.T1=atmosphere.T1_calc()
         self.rho_0=1.225 # MSL, kg/m^3
@@ -44,22 +44,9 @@ class Hover_Climb():
             return P_available, P_induced, P_prof, P_R, endurance, rc
 
 
-    def Planner(simulator_inputs, mission_inputs, atmosphere, blade):
+    def Power_Outputs(simulator_inputs, mission_inputs, atmosphere, blade):
         # Create an instance of Hover_Climb
         hover_climb = Hover_Climb(simulator_inputs, mission_inputs, atmosphere, blade)
-        
-        # Call the Performance method using the instance
-        P_available, P_induced, P_prof, P_R, endurance, rc = hover_climb.Performance()
-        # Parameters (you can replace these with inputs or a configuration file)
-        GW          = 500 * 9.81                # Take-off weight in Newtons
-        fuel_weight = 50  # Fuel weight in kg
-        h           = 2000  # Altitude in meters
-        sfc         = 0.36 / 1000  # Specific Fuel Consumption in kg/(W*h)
-        R           = 2  # Blade radius in meters
-        rpm         = 750  # Rotational speed in RPM
-        b           = 3  # Number of blades
-        c           = 0.5  # Chord length in meters
-        C_d         = 0.05  # Drag coefficient
 
         # Call the Hover_and_Climb_Performance function
         P_available, P_induced, P_prof, P_R, endurance, rc = hover_climb.Performance()
@@ -75,18 +62,9 @@ class Hover_Climb():
         return P_available, P_induced, P_prof, P_R, endurance, rc
 
     # Mission planner for multiple altitudes (plotting)
-    def Power_vs_Alt(simulator_inputs, mission_inputs, atmosphere, blade):
+    def Power_vs_Alt(self, simulator_inputs, mission_inputs, atmosphere, blade):
         hover_climb = Hover_Climb(simulator_inputs, mission_inputs, atmosphere, blade)
-        # Parameters (same as before)
-        VW = 500 * 9.81  # Take-off weight in Newtons
-        fuel_weight = 50  # Fuel weight in kg
         altitudes = np.linspace(0, 20000, 20000)  # Altitude variation in meters
-        sfc = 0.36 / 1000  # Specific Fuel Consumption in kg/(W*h)
-        R = 2  # Blade radius in meters
-        rpm = 750  # Rotational speed in RPM
-        b = 3  # Number of blades
-        c = 0.5  # Chord length in meters
-        C_d = 0.05  # Drag coefficient
 
         # Lists to store values for plotting
         P_i = []
@@ -96,7 +74,7 @@ class Hover_Climb():
         r_c = []
 
         for h in altitudes:
-            P_available, P_induced, P_prof, P_R, endurance, rc = hover_climb.Performance(VW, fuel_weight, h, sfc, R, rpm, b, c, C_d)
+            P_available, P_induced, P_prof, P_R, endurance, rc = hover_climb.Performance(self)
             P_i.append(P_induced / 1000)
             P_pr.append(P_prof / 1000)
             P_req.append(P_R / 1000)
@@ -120,38 +98,37 @@ class Hover_Climb():
         plt.legend()
         plt.grid()
         plt.xlim(0, 8000)
-        plt.show()
+        return plt.show()
 
+    def RC_vs_Alt(self, simulator_inputs, mission_inputs, atmosphere, blade):
+        r_c = []
+        P_available, P_induced, P_prof, P_R, endurance, rc = hover_climb.Performance(self)
+        hover_climb = Hover_Climb(simulator_inputs, mission_inputs, atmosphere, blade)
+        altitudes = np.linspace(0, 20000, 20000)
+        for h in altitudes:
+            _, _, _, _, _, rc = hover_climb.Performance(self)
+            r_c.append(rc)
         # Plot Rate of Climb vs Altitude
         plt.plot(altitudes, r_c, label='Rate of Climb (m/s)', color='blue')
-        plt.title('Rate of Climb vs Altitude')
+        plt.title('R/C vs Altitude')
         plt.xlabel('Altitude (m)')
         plt.ylabel('Rate of Climb (m/s)')
         plt.legend()
         plt.grid()
         plt.xlim(0, 8000)
         plt.ylim(-10, 25)
-        plt.show()
+        return plt.show()
 
 
     # Mission planner for multiple take-off weights (plotting)
-    def RC_vs_weight():
-        # Parameters (same as before)
-        fuel_weight = 50  # Fuel weight in kg
-        h = 5000  # Altitude in meters
-        sfc = 0.36 / 1000  # Specific Fuel Consumption in kg/(W*h)
-        R = 2  # Blade radius in meters
-        rpm = 750  # Rotational speed in RPM
-        b = 3  # Number of blades
-        c = 0.5  # Chord length in meters
-        C_d = 0.05  # Drag coefficient
-
+    def RC_vs_weight(self, simulator_inputs, mission_inputs, atmosphere, blade):
+        hover_climb = Hover_Climb(simulator_inputs, mission_inputs, atmosphere, blade)
         # List to store climb rates
         r_c = []
         VW = np.linspace(1, 400 * 9.81, 1000)  # Take-off weight variation in Newtons
 
         for W in VW:
-            P_available, P_induced, P_prof, P_R, endurance, rc = Hover_and_Climb_Performance(W, fuel_weight, h, sfc, R, rpm, b, c, C_d)
+            P_available, P_induced, P_prof, P_R, endurance, rc = hover_climb.Performance(self)
             r_c.append(rc)
 
         # Plot Rate of Climb vs Take-off weight
