@@ -56,15 +56,14 @@ def get_pilot_inputs():
 root = tk.Tk()
 root.title("Helicopter Flight Simulator")
 
-# For the bg image
-image = Image.open("bgimg.jfif") 
+image = Image.open("bgimg.jpeg")
+image_width, image_height = image.size
+root.geometry(f"{image_width}x{image_height}")
 photo = ImageTk.PhotoImage(image)
-
-# This just puts the image in the background (You guys are welcomed to change this image if you find a better one :D )
-canvas = tk.Canvas(root, width=photo.width(), height=photo.height())
-canvas.grid(row=0, column=0, rowspan=100, columnspan=20) 
+root.photo = photo  
+canvas = tk.Canvas(root, width=image_width, height=image_height)
+canvas.grid(row=0, column=0, rowspan=100, columnspan=20)  
 canvas.create_image(0, 0, image=photo, anchor='nw')
-
 
 # Input fields for the main rotor I/Ps
 tk.Label(root, text="FLIGHT SIMULATOR", font=("Times New Roman", 18, "bold")).grid(row=1, column=0, columnspan=2, pady=10)
