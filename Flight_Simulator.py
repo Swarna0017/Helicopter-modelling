@@ -1,8 +1,4 @@
 # The GUI appends here 
-# Inputs: 
-#    1. user inputs from the U_inputs file
-#    2. Pilot inputs from the GUI or the pilot inputs file
-# Outputs: Plots obtained on the GUI.
 
 import tkinter as tk 
 from tkinter import ttk
