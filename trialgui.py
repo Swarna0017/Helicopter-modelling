@@ -58,7 +58,7 @@ canvas = tk.Canvas(root, width=image_width, height=image_height)
 canvas.grid(row=0, column=0, rowspan=100, columnspan=20)  
 canvas.create_image(0, 0, image=photo, anchor='nw')
 
-# Input fields for the main rotor I/Ps
+
 tk.Label(root, text="FLIGHT SIMULATOR", font=("Times New Roman", 18, "bold")).grid(row=1, column=0, columnspan=2, pady=10)
 
 tk.Label(root, text="A. Main Rotor Inputs:", font=("Arial", 14, "bold")).grid(row=2, column=0, columnspan=2, pady=10)
@@ -184,7 +184,7 @@ def on_submit():
     print("User Inputs:", user_inputs)
     print("Pilot Inputs:", pilot_inputs)
 
-submit_button = ttk.Button(root, text="Submit", command=on_submit)
+submit_button = ttk.Button(root, text="Submit", command=lambda:on_submit)
 submit_button.grid(row=16, column=6, columnspan=8, pady=10)
 
 root.mainloop()
