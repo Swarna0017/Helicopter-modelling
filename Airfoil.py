@@ -25,10 +25,10 @@ class Airfoil_data:
         return self.phi
     
     def AOA(self):
-        aoa=[np.radians(self.theta)-np.radians(self.phi) for phi in self.phi]                     # Effective Angle of attack = theta - phi
+        aoa=[np.radians(self.theta)-np.radians(phi) for phi in self.phi]                     # Effective Angle of attack = theta - phi
         return aoa
 
-    def get_ClCd(self, aoa):
+    def get_ClCd(self):
         cl = [5.75*aoa for aoa in self.aoa]
         cd = [0.0113+1.25*aoa**2 for aoa in self.aoa]                 # Taking the sample/test case
         return cl, cd

@@ -39,9 +39,9 @@ class BEMT_Implementer():
 
         self.Thrust, self.Torque, self.Power = self.BEMT_Solver()
         self.Ct, self.Cq, self.Cp = self.Coeff_finder(self.Thrust, self.Torque, self.Power)
-        print(f"density: {self.rho}")
-        print(f"T={self.Thrust}\nQ={self.Torque}\nP={self.Power}")
-        print(f"Ct={self.Ct}\nCq={self.Cq}\nCp={self.Cp}")
+        print(f"density: {self.rho:.3f} kg/m^3")
+        print(f"T={self.Thrust:.3f} N\nQ={self.Torque:.3f} Nm\nP={self.Power:.3f} W")
+        print(f"Ct={self.Ct:.3f}\nCq={self.Cq:.3f}\nCp={self.Cp:.3f}")
 
     def Velocities(self,r):
         Ut = self.omega*r
@@ -62,23 +62,24 @@ class BEMT_Implementer():
         Cp = Power/(self.rho*self.MRA*(self.MR_omega*self.MRR)**3)
         return Ct, Cq, Cp
 
-    def BEMT_Solver(self):       # Defining a solver for calculating thrust, torque and power 
-        self.Thrust     = 0                 # Initializing values
-        self.Torque     = 0
-        self.Power      = 0
+    def BEMT_Solver(self):       # Defining a solver for calculating thrust, torque and power
+        self.Thrust=0
+        self.Torque=0 
         for i in range(len(self.r)):
-            r               = self.r[i]
-            chord           = np.array(self.chord_r[i])
+            r               = float(self.r[i])
+            chord           = float(self.chord_r[i])
             Ut, Up          = self.Velocities(r)
-            phi             = np.array(self.phi[i])
-            aoa             = self.aoa[i]
-            cl, cd          = np.array(Airfoil_data.get_ClCd(self, aoa))
+            phi             = float(self.phi[i])
+            aoa             = float(self.aoa[i])
+            cl, cd          = Airfoil_data.get_ClCd(self)
             F               = self.Prandtl_tip_loss_implemeter(r)
-            dT              = 0.5*self.rho*(Ut**2+Up**2)*chord*(cl*np.cos(phi)-cd*np.sin(phi))*self.dr*F
-            dQ              = 0.5*self.rho*(Ut**2+Up**2)*chord*(cl*np.cos(phi)-cd*np.sin(phi))*self.dr*F*r
+            dT              = 0.5*self.rho*(Ut**2+Up**2)*chord*(cl[i]*np.cos(phi)-cd[i]*np.sin(phi))*self.dr*F
+            dQ              = 0.5*self.rho*(Ut**2+Up**2)*chord*(cl[i]*np.cos(phi)-cd[i]*np.sin(phi))*self.dr*F*r
             self.Thrust    += dT*self.MR_nb
             self.Torque    += dQ*self.MR_nb
-        self.P=self.Torque*self.MR_omega
+        self.Power=self.Torque*self.MR_omega
+        # print(f"Iteration {i}: r={r}, chord={chord}, Ut={Ut}, Up={Up}, phi={phi}, aoa={aoa}, cl={cl}, cd={cd}, F={F}, dT={dT}, dQ={dQ}")
+
         return self.Thrust, self.Torque, self.Power
     
     
