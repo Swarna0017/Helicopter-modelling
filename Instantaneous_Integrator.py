@@ -13,8 +13,8 @@ class BEMT_Implementer():
         self.rho_0              = 1.225             # kg/m^3   
         Atmosphere_data         = Atmosphere(simulator_inputs, pilot_inputs)
         Blade                   = Blade(simulator_inputs=simulator_inputs, pilot_inputs=pilot_inputs)     
-        self.simulator_inputs   =simulator_inputs
-        self.pilot_inputs       =Pilot_Inputs 
+        self.simulator_inputs   = simulator_inputs
+        self.pilot_inputs       = Pilot_Inputs 
         self.rho                = Atmosphere_data.rho_calc()
         self.V                  = simulator_inputs.V
         self.MRR                = simulator_inputs.MRR
@@ -67,17 +67,17 @@ class BEMT_Implementer():
         self.Torque     = 0
         self.Power      = 0
         for i in range(len(self.r)):
-            r = self.r[i]
-            chord = np.array(self.chord_r[i])
-            Ut, Up = self.Velocities(r)
-            phi    = np.array(self.phi[i])
-            aoa    = self.aoa[i]
-            cl, cd = np.array(Airfoil_data.get_ClCd(self, aoa))
-            F      = self.Prandtl_tip_loss_implemeter(r)
-            dT     = 0.5*self.rho*(Ut**2+Up**2)*chord*(cl*np.cos(phi)-cd*np.sin(phi))*self.dr*F
-            dQ     = 0.5*self.rho*(Ut**2+Up**2)*chord*(cl*np.cos(phi)-cd*np.sin(phi))*self.dr*F*r
-            self.Thrust+=dT*self.MR_nb
-            self.Torque+=dQ*self.MR_nb
+            r               = self.r[i]
+            chord           = np.array(self.chord_r[i])
+            Ut, Up          = self.Velocities(r)
+            phi             = np.array(self.phi[i])
+            aoa             = self.aoa[i]
+            cl, cd          = np.array(Airfoil_data.get_ClCd(self, aoa))
+            F               = self.Prandtl_tip_loss_implemeter(r)
+            dT              = 0.5*self.rho*(Ut**2+Up**2)*chord*(cl*np.cos(phi)-cd*np.sin(phi))*self.dr*F
+            dQ              = 0.5*self.rho*(Ut**2+Up**2)*chord*(cl*np.cos(phi)-cd*np.sin(phi))*self.dr*F*r
+            self.Thrust    += dT*self.MR_nb
+            self.Torque    += dQ*self.MR_nb
         self.P=self.Torque*self.MR_omega
         return self.Thrust, self.Torque, self.Power
     
