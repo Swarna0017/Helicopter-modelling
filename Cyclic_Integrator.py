@@ -42,7 +42,7 @@ class Forward_flight_analyzer():
         alpha_tpp=np.arctan(Body_drag/self.VW)
         return (alpha_tpp)
     
-    def Sectional_load_calc(self):
+    # def Sectional_load_calc(self):
         
 
 
