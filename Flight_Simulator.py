@@ -23,13 +23,13 @@ from Blade_G import Blade as blade
 # Flight_Simulator.py or main initialization file
 
 # Unpack values
-Altitude, MRR, TRR, V, Vf, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW = Input_Plugger()
+Altitude, MRR, TRR, V, Vf, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW, Blade_Cd, Blade_Cl = Input_Plugger()
 theta_0, theta_1s, theta_1c, theta_tail = Pilot_Input_Plugger()
 
 # Create instance of U_Inputs_Simulator
 simulator_inputs = U_Inputs_Simulator(Altitude, MRR, TRR, V, Vf, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, 
                                       MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, 
-                                      MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, Blade_Cd, Blade_Cl)
+                                      MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW, Blade_Cd, Blade_Cl)
 pilot_inputs = Pilot_Inputs(theta_0, theta_1s, theta_1c, theta_tail)
 mission_inputs= U_Inputs_Planner(VW, Altitude, SFC, FW)
 atmosphere=Atmosphere(simulator_inputs, pilot_inputs)

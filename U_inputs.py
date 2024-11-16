@@ -47,7 +47,7 @@ theta_0, theta_1s, theta_1c, theta_tail = Pilot_Input_Plugger()
 # Creating an instance of these variables to use in other files and classes in the rest of the simulator flow.
 
 class U_Inputs_Simulator:                                                                   # This is the class for the input variables of the flight simulator
-    def __init__(self, Altitude: float, MRR: float, TRR: float, V: float, VW: float, 
+    def __init__(self, Altitude: float, MRR: float, TRR: float, V: float, Vf: float, VW: float, 
                  MR_nb: int, TR_nb: int, MR_Taper_ratio: float, TR_Taper_ratio: float, 
                  MR_rc: float, TR_rc: float, MR_root_twist: float, MR_tip_twist: float, 
                  TR_root_twist: float, TR_tip_twist: float, MR_chord: float, TR_chord: float, 
