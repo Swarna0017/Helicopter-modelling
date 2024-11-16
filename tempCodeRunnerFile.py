@@ -1,5 +1,3 @@
-# from blade import *
-# from Atmosphere import *
-# from Cl import *
-# from FS_user_inputs2 import *
-# from inflow import *
+# if __name__ == "__main__":
+#     for mission in missions:
+#         execute_mission(mission)

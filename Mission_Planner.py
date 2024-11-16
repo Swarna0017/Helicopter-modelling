@@ -251,9 +251,11 @@ class Forward_Flight():
         plt.grid()
         return plt.show()
 
-# This section simulates/co-ordinates the missions given in assignment 3 
+import matplotlib.pyplot as plt
+
+# Constants and parameters
 GRAVITY = 9.81  # Gravity acceleration (m/s^2)
-DESIRED_CLIMB_RATE = 2.0  # m/s, desired climb rate for successful missions
+DESIRED_CLIMB_RATE = 20.0  # m/s, desired climb rate for successful missions
 DESIRED_CRUISE_SPEED = 60.0  # m/s, desired cruise speed for level flight
 FUEL_CONSUMPTION_RATE = 0.1  # Fuel consumption rate (kg/s)
 
@@ -261,7 +263,7 @@ FUEL_CONSUMPTION_RATE = 0.1  # Fuel consumption rate (kg/s)
 MAX_ENGINE_POWER = 500  # kW, example maximum power available
 MAX_FUEL_CAPACITY = 1000  # kg, maximum fuel capacity
 
-# Mission scenarios (as per your previous context)
+# Mission scenarios
 missions = [
     {"name": "Successful Payload Drop", "task": "vertical climb, steady climb"},
     {"name": "Successful Payload Pickup", "task": "steady climb, vertical climb"},
