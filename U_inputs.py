@@ -7,12 +7,13 @@ def Input_Plugger():
     MRR             = 0.762                     # Main Rotor Radius in metres
     TRR             = 0.5                       # Tail Rotor Radius in meters
     V               = 100                       # Flight (climb) velocity in m/s
+    Vf              = 140                       # Forward flight velocity
     VW              = 50  * 9.81                # Weight of the vehicle in kg
     MR_nb           = 3                         # Number of main rotor blades
     TR_nb           = 2                         # Number of Tail Rotor blades
     MR_Taper_ratio  = 0.8                       # Enter the taper ratio of the main rotor blades
     TR_Taper_ratio  = 0.8                       # Taper ratio of tail rotor blades
-    MR_rc           = 0.125                      # Enter the root cut-out of main rotor blade
+    MR_rc           = 0.125                     # Enter the root cut-out of main rotor blade
     TR_rc           = 0.1                       # Enter the root cut-out of tail rotor blade
     MR_root_twist   = 4                         # Enter the twist of main rotor blade root
     MR_tip_twist    = 0                         # Enter the twist of main rotor blade tip
@@ -28,7 +29,9 @@ def Input_Plugger():
     body_area       = 2  # (fuselage body area) # Cd = 0.2 to 0.4 for small helicopters, 0.3 to 0.5 for medium helicpters, 0.4 to 0.6 for militray helicopters, and 0.15 to 0.25 for highly streamlined models
     SFC             = 0.36/1000                 # Specific fuel consumption, used in the planner
     FW              = 10  * 9.81                # Fuel weight (used in the planner)
-    return Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW
+    Blade_Cd        = 0.007
+    Blade_Cl        = 0.009
+    return Altitude, MRR, TRR, V, Vf, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW, Blade_Cd, Blade_Cl
 
 def Pilot_Input_Plugger():
     theta_0         = 10                         # Main Rotor Collective pitch 
@@ -38,7 +41,7 @@ def Pilot_Input_Plugger():
     return theta_0, theta_1s, theta_1c, theta_tail
  
 # Calling the Input_Plugger function to store the values in the following variables
-Altitude, MRR, TRR, V, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW = Input_Plugger()
+Altitude, MRR, TRR, V, Vf, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW, Blade_Cd, Blade_Cl = Input_Plugger()
 theta_0, theta_1s, theta_1c, theta_tail = Pilot_Input_Plugger()
 
 # Creating an instance of these variables to use in other files and classes in the rest of the simulator flow.
@@ -48,12 +51,13 @@ class U_Inputs_Simulator:                                                       
                  MR_nb: int, TR_nb: int, MR_Taper_ratio: float, TR_Taper_ratio: float, 
                  MR_rc: float, TR_rc: float, MR_root_twist: float, MR_tip_twist: float, 
                  TR_root_twist: float, TR_tip_twist: float, MR_chord: float, TR_chord: float, 
-                 HS_chord: float, MR_omega: float, MRA: float, Iterations, Cd_body: float, body_area:float):
+                 HS_chord: float, MR_omega: float, MRA: float, Iterations, Cd_body: float, body_area:float, SFC:float, FW:float, Blade_Cd:float, Blade_Cl:float):
         
         self.Altitude = Altitude
         self.MRR = MRR
         self.TRR = TRR
         self.V = V
+        self.Vf = Vf
         self.VW = VW
         self.MR_nb = MR_nb
         self.TR_nb = TR_nb
@@ -73,6 +77,10 @@ class U_Inputs_Simulator:                                                       
         self.Iterations =Iterations
         self.Cd_body    =Cd_body
         self.body_area  =body_area
+        self.SFC        = SFC
+        self.FW         = FW
+        self.Blade_Cd   = Blade_Cd
+        self.Blade_Cl   = Blade_Cl
 
 class Pilot_Inputs():                                                                       # This is the class for pilot inputs of the flight simulator
     def __init__(self, theta_0:float, theta_1s:float, theta_1c:float, theta_tail):

@@ -159,116 +159,100 @@ class Hover_Climb():
         plt.xlim(1, 400 * 9.81)
         return plt.show()
 
- #class Forward_Flight_Performance:
-    # def __init__(self, simulator_inputs: U_Inputs_Simulator, mission_inputs: U_Inputs_Planner, atmosphere: Atmosphere, blade: Blade):
-    #     # Extract simulator and mission parameters
-    #     self.VW             = simulator_inputs.VW
-    #     self.FW             = simulator_inputs.FW
-    #     self.h              = simulator_inputs.Altitude
-    #     self.SFC            = mission_inputs.SFC
-    #     self.R              = simulator_inputs.R
-    #     self.rpm            = simulator_inputs.rpm
-    #     self.b              = blade.b
-    #     self.c              = blade.c
-    #     self.C_d            = blade.C_d
-    #     self.C_L            = blade.C_L
-    #     self.Vf             = simulator_inputs.Vf
-    #     self.distance       = simulator_inputs.distance
-    #     self.D              = simulator_inputs.D
-    #     self.power_loss     = simulator_inputs.installed_power_loss
-    #     self.rho_0          = 1.225  # Sea level air density in kg/m^3
-    #     self.g              = 9.81  # Gravitational acceleration in m/s^2
-    #     self.R0             = 287.05  # Specific gas constant for air in J/(kg*K)
-    #     self.T0             = 288.15  # Sea level standard temperature in K
-    #     self.L              = 0.0065  # Temperature lapse rate in K/m
-    #     self.P_sea_level    = 100  # Power at sea level (kW)
+class Forward_Flight_Performance:
+    def __init__(self, simulator_inputs: U_Inputs_Simulator, mission_inputs: U_Inputs_Planner, atmosphere: Atmosphere, blade: Blade):
+        # Extract simulator and mission parameters
+        self.VW             = simulator_inputs.VW
+        self.FW             = simulator_inputs.FW
+        self.Altitude       = simulator_inputs.Altitude
+        self.SFC            = mission_inputs.SFC
+        self.MRR            = simulator_inputs.MRR
+        self.MRA            = simulator_inputs.MRA
+        self.rpm            = simulator_inputs.rpm
+        self.solidity       = blade.Disk_solidity()
+        self.omega          = simulator_inputs.MR_omega
+        self.C_d            = simulator_inputs.Blade_Cd
+        self.C_L            = simulator_inputs.Blade.Cl
+        self.Vf             = simulator_inputs.Vf
+        self.distance       = simulator_inputs.distance
+        self.D              = simulator_inputs.D
+        self.power_loss     = mission_inputs.installed_power_loss
+        self.rho_0          = 1.225              # Sea level air density in kg/m^3
+        self.g              = 9.81               # Gravitational acceleration in m/s^2
+        self.R0             = 287.05             # Specific gas constant for air in J/(kg*K)
+        self.T0             = 288.15             # Sea level standard temperature in K
+        self.L              = 0.0065             # Temperature lapse rate in K/m
+        self.P_sea_level    = 100                # Power at sea level (kW)
+        self.mu             = self.Vf*(self.omega*self.MRR)
 
-    # def rho_finder(self, h):
-    #     # Calculate air density at altitude
-    #     T = self.T0 - self.L * h  # Temperature at altitude
-    #     rho = self.rho_0 * ((T / self.T0) ** ((self.g / (self.L * self.R0)) - 1))  # Density at altitude
-    #     return rho
+    def rho_finder(self, h):
+        # Calculate air density at altitude
+        T = self.T0 - self.L * h  # Temperature at altitude
+        rho = self.rho_0 * ((T / self.T0) ** ((self.g / (self.L * self.R0)) - 1))  # Density at altitude
+        return rho
 
-    # def Forward_Flight_Performance(self):
-    #     rho = self.rho_finder(self.h)
+    def Forward_Flight_Performance(self,rho, Vf):
+        rho = self.rho_finder(self.Altitude)
+        power_available = self.P_sea_level * (rho / self.rho_0)
+        P_prof = (self.MRA * rho * self.solidity * self.C_d * ((self.omega * self.MRR) ** 3) * (1 + 3 * (self.mu ** 2))) / 8  # in Watts
+        P_induced = (self.VW ** 2) / (2 * rho * self.MRA * self.Vf)     # in Watts
+        f = 0.37 / math.pi                                              # Flat plate area
+        P_parasite = 0.5 * rho * f * (self.Vf ** 3)                     # W
+        P_R = P_induced + P_prof + P_parasite                           # W
 
-    #     # Available power at altitude
-    #     power_available = self.P_sea_level * (rho / self.rho_0)
+        # Calculate Rate of Climb (RC)
+        rc = ((power_available * 1000 * (1 - self.installed_power_loss)) - P_R) / self.GW  # in m/s
 
-    #     # Calculate solidity
-    #     solidity = (self.b * self.c) / (math.pi * self.R)
+        # Maximum speed based on blade stall
+        Vmax = ((2 * self.VW) / (rho * self.C_L * self.MRA)) ** 0.5  # in m/s
 
-    #     # Calculate angular velocity (omega)
-    #     omega = (2 * math.pi * self.rpm) / 60  # in rad/s
+        # Calculate Range (km)
+        Range = (self.FW * Vf) / (P_R * self.SFC)  # in km
+        Flight_time = Range * 1000 / (3600 * self.Vf)  # Maximum flight time in hours
 
-    #     # Rotor disk area
-    #     A = math.pi * (self.R ** 2)  # in m^2
-
-    #     # Advance ratio
-    #     mu = self.Vf / (omega * self.R)
-
-    #     # Calculate Blade Profile Power
-    #     P_prof = (A * rho * solidity * self.C_d * ((omega * self.R) ** 3) * (1 + 3 * (mu ** 2))) / 8  # in Watts
-
-    #     # Calculate induced power
-    #     P_induced = (self.GW ** 2) / (2 * rho * A * self.Vf)  # in Watts
-
-    #     # Calculate parasite power
-    #     f = 0.37 / math.pi  # Equivalent flat plate area, based on Venkatesan
-    #     P_parasite = 0.5 * rho * f * (self.Vf ** 3)  # in Watts
-
-    #     # Calculate total power required
-    #     P_R = P_induced + P_prof + P_parasite  # in Watts
-
-    #     # Calculate Rate of Climb (RC)
-    #     rc = ((power_available * 1000 * (1 - self.installed_power_loss)) - P_R) / self.GW  # in m/s
-
-    #     # Maximum speed based on blade stall
-    #     Vmax = ((2 * self.GW) / (rho * self.C_L * A)) ** 0.5  # in m/s
-
-    #     # Calculate Range (km)
-    #     Range = (self.fuel_weight * self.Vf) / (P_R * self.SFC)  # in km
-
-    #     # Calculate flight time (hours)
-    #     Flight_time = Range * 1000 / (3600 * self.Vf)  # Maximum flight time in hours
-
-    #     # Check if fuel is sufficient for mission
-    #     if self.distance > Range:
-    #         raise ValueError("Mission failed: Insufficient fuel")
+        # Check if fuel is sufficient for mission
+        if self.distance > Range:
+            raise ValueError("Mission failed: Insufficient fuel")
         
-    #     return power_available, P_induced, P_prof, P_parasite, P_R, Range, Flight_time, rc, Vmax
+        return power_available, P_induced, P_prof, P_parasite, P_R, Range, Flight_time, rc, Vmax
 
-    # def Power_vs_Vf(self):
-    #     Vf_range = np.linspace(15, 100, 1000)  # Forward velocity variation in m/s
+    def Power_vs_Vf(self, rho, Vf):
+        Vf_range = np.linspace(15, 100, 1000)  # Forward velocity variation in m/s
 
-    #     P_i, P_pr, P_para, P_req, P_avail, r_c = [], [], [], [], [], []
+        P_i     = []
+        P_pr    = []
+        P_para  = []
+        P_req   = []
+        P_avail = []
+        r_c     = []
 
-    #     for Vf in Vf_range:
-    #         self.Vf = Vf  # Update forward velocity
-    #         results = self.Forward_Flight_Performance()
-    #         P_induced, P_prof, P_parasite, P_R, power_available, range, Flight_time, rc, Vmax = results
+        for Vf in Vf_range:
+            self.Vf = Vf  # Update forward velocity
+            rho = self.rho_finder(self.Altitude)
+            results = self.Forward_Flight_Performance(rho)
+            P_induced, P_prof, P_parasite, P_R, power_available, range, Flight_time, rc, Vmax = results
 
-    #         P_i.append(P_induced / 1000)
-    #         P_pr.append(P_prof / 1000)
-    #         P_para.append(P_parasite / 1000)
-    #         P_req.append(P_R / 1000)
-    #         P_avail.append(power_available)
-    #         r_c.append(rc)
+            P_i.append(P_induced / 1000)
+            P_pr.append(P_prof / 1000)
+            P_para.append(P_parasite / 1000)
+            P_req.append(P_R / 1000)
+            P_avail.append(power_available)
+            r_c.append(rc)
 
-    #         if -0.01 <= (power_available - P_R / 1000) <= 0.01:
-    #             print(f"Maximum speed based on power required (m/s): {Vf}")
+            if -0.01 <= (power_available - P_R / 1000) <= 0.01:
+                print(f"Maximum speed based on power required (m/s): {Vf}")
 
-    #     plt.plot(Vf_range, P_i, label='Induced Power (kW)', color='blue')
-    #     plt.plot(Vf_range, P_pr, label='Profile Power (kW)', color='orange')
-    #     plt.plot(Vf_range, P_para, label='Parasite Power (kW)', color='green')
-    #     plt.plot(Vf_range, P_req, label='Power Required (kW)', color='red')
-    #     plt.plot(Vf_range, P_avail, label='Power Available (kW)', color='black')
-    #     plt.title('Power vs Forward Speed')
-    #     plt.xlabel('Forward Speed (m/s)')
-    #     plt.ylabel('Power (kW)')
-    #     plt.legend()
-    #     plt.grid()
-    #     plt.show()
+        plt.plot(Vf_range, P_i, label='Induced Power (kW)', color='blue')
+        plt.plot(Vf_range, P_pr, label='Profile Power (kW)', color='orange')
+        plt.plot(Vf_range, P_para, label='Parasite Power (kW)', color='green')
+        plt.plot(Vf_range, P_req, label='Power Required (kW)', color='red')
+        plt.plot(Vf_range, P_avail, label='Power Available (kW)', color='black')
+        plt.title('Power vs Forward Speed')
+        plt.xlabel('Forward Speed (m/s)')
+        plt.ylabel('Power (kW)')
+        plt.legend()
+        plt.grid()
+        return plt.show()
 
 # Example usage:
 # # Create a simulation and mission input objects
