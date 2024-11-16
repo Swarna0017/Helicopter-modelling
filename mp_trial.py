@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import time
 
 # Constants and parameters
 GRAVITY = 9.81  # Gravity acceleration (m/s^2)
@@ -23,7 +24,7 @@ def vertical_climb(initial_weight, fuel_weight, climb_rate):
     """Calculate the vertical climb phase."""
     max_altitude = 1000  # m
     time_to_max_altitude = max_altitude / climb_rate
-    fuel_used = fuel_weight * (time_to_max_altitude / 1000)  # fuel consumed in this phase
+    fuel_used = time_to_max_altitude * FUEL_CONSUMPTION_RATE
     fuel_used = min(fuel_used, fuel_weight)  # Prevent fuel from exceeding available fuel
     gross_weight_at_max_altitude = initial_weight - fuel_used
     return time_to_max_altitude, gross_weight_at_max_altitude, fuel_used
@@ -33,7 +34,7 @@ def steady_climb(initial_weight, fuel_weight, climb_rate, wind_speed):
     net_climb_rate = climb_rate - wind_speed
     max_altitude = 1000  # m
     time_to_max_altitude = max_altitude / net_climb_rate
-    fuel_used = fuel_weight * (time_to_max_altitude / 1000)  # fuel consumed in this phase
+    fuel_used = time_to_max_altitude * FUEL_CONSUMPTION_RATE
     fuel_used = min(fuel_used, fuel_weight)  # Prevent fuel from exceeding available fuel
     gross_weight_at_max_altitude = initial_weight - fuel_used
     return time_to_max_altitude, gross_weight_at_max_altitude, fuel_used
@@ -41,7 +42,7 @@ def steady_climb(initial_weight, fuel_weight, climb_rate, wind_speed):
 def level_flight(initial_weight, fuel_weight, cruise_speed):
     """Calculate the level flight phase."""
     time_to_runout = fuel_weight / FUEL_CONSUMPTION_RATE
-    fuel_consumed = FUEL_CONSUMPTION_RATE * time_to_runout
+    fuel_consumed = time_to_runout * FUEL_CONSUMPTION_RATE
     fuel_consumed = min(fuel_consumed, fuel_weight)  # Prevent fuel from going negative
     distance_covered = cruise_speed * time_to_runout
     gross_weight_at_runout = initial_weight - fuel_consumed
@@ -186,18 +187,14 @@ def execute_mission(mission):
             plot_mission_results(mission_results, mission['name'], initial_weight)
             return
 
-    # Execute phases
-    vertical_time, vertical_weight, vertical_fuel = vertical_climb(initial_weight, fuel_weight, DESIRED_CLIMB_RATE)
-    steady_time, steady_weight, steady_fuel = steady_climb(initial_weight, fuel_weight, DESIRED_CLIMB_RATE, 5)  # Wind speed
-    level_distance, level_fuel, level_weight = level_flight(initial_weight, fuel_weight, DESIRED_CRUISE_SPEED)
-
-    mission_results.append((vertical_time, vertical_weight, vertical_fuel))
-    mission_results.append((steady_time, steady_weight, steady_fuel))
-    mission_results.append((level_distance, level_fuel, level_weight))
+    # For successful missions
+    mission_results.append(vertical_climb(initial_weight, fuel_weight, DESIRED_CLIMB_RATE))
+    mission_results.append(steady_climb(initial_weight, fuel_weight, DESIRED_CLIMB_RATE, 0))  # No wind
+    mission_results.append(level_flight(initial_weight, fuel_weight, DESIRED_CRUISE_SPEED))
 
     plot_mission_results(mission_results, mission['name'], initial_weight)
 
 
-# Execute all mission scenarios
+# Execute all missions
 for mission in missions:
     execute_mission(mission)
