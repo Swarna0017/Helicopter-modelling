@@ -1,15 +1,12 @@
-# mission_planner.py
-import math
-import numpy as np
-import matplotlib.pyplot as plt
-
 from Blade_G    import Blade
 from AirData    import Atmosphere
 from U_inputs   import U_Inputs_Simulator, U_Inputs_Planner
 from Inflow     import v_calculator
 
+import math
+import numpy as np
+import matplotlib.pyplot as plt
 
-  # Available power MSL, kW
 
 class Hover_Climb():
     def __init__(self, simulator_inputs: U_Inputs_Simulator, mission_inputs: U_Inputs_Planner, atmosphere: Atmosphere, blade: Blade):
