@@ -254,32 +254,7 @@ class Forward_Flight():
         plt.grid()
         return plt.show()
 
-# Example usage:
-# # Create a simulation and mission input objects
-# simulator_inputs = {
-#     'GW': 300 * 9.81,  # Take-off weight in Newtons
-#     'fuel_weight': 50,  # Fuel weight in kg
-#     'h': 2000,  # Altitude in meters
-#     'Vf': 30,  # Forward velocity in m/s
-#     'distance': 0,  # Distance in km
-#     'D': 0,  # Drag in Newtons
-#     'installed_power_loss': 0  # Installed power loss
-# }
-# mission_inputs = {
-#     'SFC': 0.36 / 1000,  # Specific fuel consumption in kg/(W*h)
-# }
-# blade = {
-#     'b': 3,  # Number of blades
-#     'c': 0.5,  # Chord length in meters
-#     'C_d': 0.0079,  # Drag coefficient
-#     'C_L': 0.1  # Lift coefficient
-# }
-
-# # Initialize and run the simulation
-# flight_perf = Forward_Flight_Performance(simulator_inputs, mission_inputs, atmosphere=None, blade=blade)
-# flight_perf.Power_vs_Vf()
-
-
-# class Mission_Segments():
-#     def __init__(self) -> None:
-#         pass
+# This section simulates/co-ordinates the missions in 
+class Mission_Segments():
+    def __init__(self) -> None:
+        pass
