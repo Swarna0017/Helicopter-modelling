@@ -75,3 +75,9 @@ C. Variables used:
     13. alpha_tpp: Angle made my tip path plane with the relative wind
     14. psi: azimuthal angle 
     15. v/vi: induced velocity
+    16. Power_loss: Installed power loss of the engine
+    17. SFC: Specific fuel consumption
+    18. Blade_Cd: Coefficient of drag associated with the blade
+    19. Blade_Cl: Coefficient of lift associated with the blade
+    20: FW: Fuel Weight
+    21. Vf: Forward Flight velocity
