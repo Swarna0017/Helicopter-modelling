@@ -251,7 +251,189 @@ class Forward_Flight():
         plt.grid()
         return plt.show()
 
-# This section simulates/co-ordinates the missions in 
-class Mission_Segments():
-    def __init__(self) -> None:
-        pass
+# This section simulates/co-ordinates the missions given in assignment 3 
+GRAVITY = 9.81  # Gravity acceleration (m/s^2)
+DESIRED_CLIMB_RATE = 2.0  # m/s, desired climb rate for successful missions
+DESIRED_CRUISE_SPEED = 60.0  # m/s, desired cruise speed for level flight
+FUEL_CONSUMPTION_RATE = 0.1  # Fuel consumption rate (kg/s)
+
+# Helicopter performance constants (example values)
+MAX_ENGINE_POWER = 500  # kW, example maximum power available
+MAX_FUEL_CAPACITY = 1000  # kg, maximum fuel capacity
+
+# Mission scenarios (as per your previous context)
+missions = [
+    {"name": "Successful Payload Drop", "task": "vertical climb, steady climb"},
+    {"name": "Successful Payload Pickup", "task": "steady climb, vertical climb"},
+    {"name": "Fuel-Limited Unsuccessful Payload Pickup", "task": "steady climb, vertical climb, fuel constraints"},
+    {"name": "Power-Limited Unsuccessful Payload Drop", "task": "level flight, power constraints"}
+]
+
+# Auxiliary functions for fuel and weight calculations
+def calculate_air_density(temperature, pressure):
+    """Simple function to calculate air density using the ideal gas law (simplified)."""
+    R = 287.05  # Specific gas constant for dry air (J/(kg·K))
+    temp_kelvin = temperature + 273.15
+    air_density = pressure / (R * temp_kelvin)
+    return air_density
+
+def vertical_climb(initial_weight, fuel_weight, climb_rate):
+    """Calculate the vertical climb phase."""
+    max_altitude = 1000  # m
+    time_to_max_altitude = max_altitude / climb_rate
+    gross_weight_at_max_altitude = initial_weight - fuel_weight
+    return time_to_max_altitude, gross_weight_at_max_altitude
+
+def steady_climb(initial_weight, fuel_weight, climb_rate, wind_speed):
+    """Calculate the steady climb phase with wind conditions."""
+    net_climb_rate = climb_rate - wind_speed
+    max_altitude = 1000  # m
+    time_to_max_altitude = max_altitude / net_climb_rate
+    gross_weight_at_max_altitude = initial_weight - fuel_weight
+    return time_to_max_altitude, gross_weight_at_max_altitude
+
+def level_flight(initial_weight, fuel_weight, cruise_speed):
+    """Calculate the level flight phase."""
+    time_to_runout = fuel_weight / FUEL_CONSUMPTION_RATE
+    distance_covered = cruise_speed * time_to_runout
+    fuel_consumed = FUEL_CONSUMPTION_RATE * time_to_runout
+    return distance_covered, fuel_consumed
+
+def power_limited_climb(initial_weight, fuel_weight, climb_rate, available_power):
+    """Check if climb rate is achievable based on available power."""
+    power_required_for_climb = (initial_weight * GRAVITY * climb_rate) / available_power
+    if power_required_for_climb > available_power:
+        return False  # Not enough power for the climb
+    return True
+
+
+def plot_mission_results(mission_results, mission_type, initial_weight, fuel_burn_rate):
+    """Plot mission results (e.g., weight, fuel consumption, etc.) in multiple subplots."""
+    
+    # Initialize lists to store times, weights, and other metrics for plotting
+    times = []
+    weights = []
+    fuel_consumed = []
+    distances = []
+    climb_rates = []
+
+    current_weight = initial_weight  # Start with initial gross weight
+    total_fuel_consumed = 0  # Initialize fuel consumed
+
+    # Process mission results
+    for result in mission_results:
+        if len(result) == 2:  # Vertical and Steady Climb (time, weight)
+            time, weight = result
+            times.append(time)
+            weights.append(weight)
+            fuel_consumed.append(total_fuel_consumed)
+            distances.append(0)  # No distance covered in climb phase
+            climb_rates.append(weight)  # Use weight as a placeholder for climb rate (can refine later)
+        elif len(result) == 3:  # Level Flight (distance, fuel consumption)
+            distance, fuel = result
+            # Calculate time from distance (distance / speed)
+            time = distance / DESIRED_CRUISE_SPEED
+            total_fuel_consumed += fuel
+            current_weight = initial_weight - total_fuel_consumed
+            times.append(time)
+            weights.append(current_weight)
+            fuel_consumed.append(total_fuel_consumed)
+            distances.append(distance)
+            climb_rates.append(0)  # No climb during level flight, so no climb rate
+
+    # Ensure times and weights have the same dimensions for plotting
+    if len(times) != len(weights):
+        print(f"Error: Times and Weights have different lengths for {mission_type}.")
+        return
+
+    # Create subplots in a 2x2 grid
+    plt.figure(figsize=(12, 10))
+
+    # Plot 1: Gross Weight vs Time
+    plt.subplot(2, 2, 1)
+    plt.plot(times, weights, label=f'{mission_type} Gross Weight', color='b')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Weight (kg)')
+    plt.title(f'{mission_type} - Gross Weight Over Time')
+    plt.grid(True)
+    plt.legend()
+
+    # Plot 2: Fuel Consumption vs Time
+    plt.subplot(2, 2, 2)
+    plt.plot(times, fuel_consumed, label=f'{mission_type} Fuel Consumption', color='g')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Fuel Consumed (kg)')
+    plt.title(f'{mission_type} - Fuel Consumption Over Time')
+    plt.grid(True)
+    plt.legend()
+
+    # Plot 3: Climb Rate vs Time (placeholder for vertical climb or steady climb rates)
+    plt.subplot(2, 2, 3)
+    plt.plot(times, climb_rates, label=f'{mission_type} Climb Rate', color='r')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Climb Rate (m/s)')
+    plt.title(f'{mission_type} - Climb Rate Over Time')
+    plt.grid(True)
+    plt.legend()
+
+    # Plot 4: Distance Covered vs Time (level flight)
+    plt.subplot(2, 2, 4)
+    plt.plot(times, distances, label=f'{mission_type} Distance Covered', color='c')
+    plt.xlabel('Time (s)')
+    plt.ylabel('Distance (m)')
+    plt.title(f'{mission_type} - Distance Covered Over Time')
+    plt.grid(True)
+    plt.legend()
+
+    plt.tight_layout()  # Adjust layout for neat display
+    plt.show()
+
+
+# Mission Execution and Planning
+def execute_mission(mission):
+    """Execute the mission based on its task requirements."""
+    print(f"Executing mission: {mission['name']}")
+
+    initial_weight = 50  # kg, example initial weight
+    fuel_weight = 10     # kg, example initial fuel weight
+    mission_results = []
+
+    # Check for fuel constraints
+    if "fuel constraints" in mission['task']:
+        if fuel_weight < 100:
+            print("Mission fuel-limited: Insufficient fuel for climb.")
+            return mission_results
+
+    # Check for power constraints
+    if "power constraints" in mission['task']:
+        if not power_limited_climb(initial_weight, fuel_weight, DESIRED_CLIMB_RATE, MAX_ENGINE_POWER):
+            print("Mission power-limited: Not enough power for climb.")
+            return mission_results
+
+    # Execute the segments based on the task requirements
+    if "vertical climb" in mission['task']:
+        time_to_max_altitude, gross_weight_at_max = vertical_climb(initial_weight, fuel_weight, DESIRED_CLIMB_RATE)
+        mission_results.append((time_to_max_altitude, gross_weight_at_max))
+        print(f"Time to reach max altitude (vertical climb): {time_to_max_altitude} seconds")
+        print(f"Gross weight at max altitude: {gross_weight_at_max} kg")
+
+    if "steady climb" in mission['task']:
+        wind_speed = 5.0  # m/s, example wind speed
+        time_to_max_altitude, gross_weight_at_max = steady_climb(initial_weight, fuel_weight, DESIRED_CLIMB_RATE, wind_speed)
+        mission_results.append((time_to_max_altitude, gross_weight_at_max))
+        print(f"Time to reach max altitude (steady climb): {time_to_max_altitude} seconds")
+        print(f"Gross weight at max altitude: {gross_weight_at_max} kg")
+
+    if "level flight" in mission['task']:
+        distance, fuel_used = level_flight(initial_weight, fuel_weight, DESIRED_CRUISE_SPEED)
+        mission_results.append((distance, fuel_used))
+        print(f"Distance covered during level flight: {distance} meters")
+        print(f"Fuel consumed during level flight: {fuel_used} kg")
+
+    plot_mission_results(mission_results, mission['name'], initial_weight=50, fuel_burn_rate=0.25)
+    return mission_results
+
+# Main execution loop for all missions
+if __name__ == "__main__":
+    for mission in missions:
+        execute_mission(mission)
