@@ -22,7 +22,7 @@ def Input_Plugger():
     MR_chord        = 0.0508                    # Main rotor blade chord
     TR_chord        = 0.2                       # Tail rotor blade chord
     HS_chord        = 0.09                      # Horizontal stabilizer blade chord
-    MR_omega        = 123                       # Enter the RPM of the main rotor blades
+    MR_omega        = 200                       # Enter the RPM of the main rotor blades
     MRA             = np.pi*MRR**2
     Iterations      = 100                       # the number of iterations for force calculation
     Cd_body         = 0.3                       # Enter the body drag coefficient for your helicopter, if unknown, use the following reference: 
@@ -30,8 +30,9 @@ def Input_Plugger():
     SFC             = 0.36/1000                 # Specific fuel consumption, used in the planner
     FW              = 10  * 9.81                # Fuel weight (used in the planner)
     Blade_Cd        = 0.007
-    Blade_Cl        = 0.009
-    return Altitude, MRR, TRR, V, Vf, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW, Blade_Cd, Blade_Cl
+    Blade_Cl        = 0.09
+    Power_loss      = 10
+    return Altitude, MRR, TRR, V, Vf, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW, Blade_Cd, Blade_Cl, Power_loss
 
 def Pilot_Input_Plugger():
     theta_0         = 10                         # Main Rotor Collective pitch 
@@ -41,7 +42,7 @@ def Pilot_Input_Plugger():
     return theta_0, theta_1s, theta_1c, theta_tail
  
 # Calling the Input_Plugger function to store the values in the following variables
-Altitude, MRR, TRR, V, Vf, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW, Blade_Cd, Blade_Cl = Input_Plugger()
+Altitude, MRR, TRR, V, Vf, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW, Blade_Cd, Blade_Cl, Power_loss = Input_Plugger()
 theta_0, theta_1s, theta_1c, theta_tail = Pilot_Input_Plugger()
 
 # Creating an instance of these variables to use in other files and classes in the rest of the simulator flow.
@@ -82,6 +83,7 @@ class U_Inputs_Simulator:                                                       
         self.Blade_Cd   = Blade_Cd
         self.Blade_Cl   = Blade_Cl
 
+
 class Pilot_Inputs():                                                                       # This is the class for pilot inputs of the flight simulator
     def __init__(self, theta_0:float, theta_1s:float, theta_1c:float, theta_tail):
         self.theta_0 = theta_0
@@ -90,10 +92,11 @@ class Pilot_Inputs():                                                           
         self.theta_tail = theta_tail
 
 class U_Inputs_Planner:
-    def __init__(self, VW, Altitude, SFC, FW):
+    def __init__(self, VW, Altitude, SFC, FW, Power_loss):
         self.VW         = VW
         self.Altitude   = Altitude
         self.SFC        = SFC
         self.FW         = FW
+        self.Power_loss = Power_loss
 
 # Flight_Simulator_Inputs=U_Inputs_Simulator()

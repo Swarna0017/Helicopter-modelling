@@ -17,13 +17,13 @@ from PIL import Image, ImageTk                       # Importing Image and Image
 written using non-oops concept, you try with this command from your_file_name import * """
 from Instantaneous_Integrator import BEMT_Implementer            # Replacing the dummy data function with functions written in instantaneous integrator.
 from U_inputs import *
-from Mission_Planner import Hover_Climb, Forward_Flight_Performance
+from Mission_Planner import Hover_Climb, Forward_Flight
 from AirData import Atmosphere
 from Blade_G import Blade as blade
 # Flight_Simulator.py or main initialization file
 
 # Unpack values
-Altitude, MRR, TRR, V, Vf, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW, Blade_Cd, Blade_Cl = Input_Plugger()
+Altitude, MRR, TRR, V, Vf, VW, MR_nb, TR_nb, MR_Taper_ratio, TR_Taper_ratio, MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW, Blade_Cd, Blade_Cl, Power_loss = Input_Plugger()
 theta_0, theta_1s, theta_1c, theta_tail = Pilot_Input_Plugger()
 
 # Create instance of U_Inputs_Simulator
@@ -31,18 +31,18 @@ simulator_inputs = U_Inputs_Simulator(Altitude, MRR, TRR, V, Vf, VW, MR_nb, TR_n
                                       MR_rc, TR_rc, MR_root_twist, MR_tip_twist, TR_root_twist, TR_tip_twist, 
                                       MR_chord, TR_chord, HS_chord, MR_omega, MRA, Iterations, Cd_body, body_area, SFC, FW, Blade_Cd, Blade_Cl)
 pilot_inputs = Pilot_Inputs(theta_0, theta_1s, theta_1c, theta_tail)
-mission_inputs= U_Inputs_Planner(VW, Altitude, SFC, FW)
+mission_inputs= U_Inputs_Planner(VW, Altitude, SFC, FW, Power_loss)
 atmosphere=Atmosphere(simulator_inputs, pilot_inputs)
 
 # Initialize BEMT_Implementer with the simulator_inputs instance
 bemt            = BEMT_Implementer(simulator_inputs=simulator_inputs, pilot_inputs=pilot_inputs)
 hover_climb     = Hover_Climb(simulator_inputs, mission_inputs, atmosphere, blade)
-forward_flight  = Forward_Flight_Performance(simulator_inputs, mission_inputs, atmosphere, blade)
-Power_Outputs   = hover_climb.Power_Outputs(simulator_inputs, mission_inputs, atmosphere, blade)
-Power_vs_Alt    = hover_climb.Power_vs_Alt(simulator_inputs, mission_inputs, atmosphere, blade)
-RC_vs_Alt       = hover_climb.RC_vs_Alt(simulator_inputs, mission_inputs, atmosphere, blade)
-RC_vs_Weight    = hover_climb.RC_vs_weight(simulator_inputs, mission_inputs, atmosphere, blade)
-Power_vs_Vf     = forward_flight.Power_vs_Vf
+forward_flight  = Forward_Flight(simulator_inputs, mission_inputs, atmosphere, blade)
+# Power_Outputs   = hover_climb.Power_Outputs(simulator_inputs, mission_inputs, atmosphere, blade)
+# Power_vs_Alt    = hover_climb.Power_vs_Alt(simulator_inputs, mission_inputs, atmosphere, blade)
+# RC_vs_Alt       = hover_climb.RC_vs_Alt(simulator_inputs, mission_inputs, atmosphere, blade)
+# RC_vs_Weight    = hover_climb.RC_vs_weight(simulator_inputs, mission_inputs, atmosphere, blade)
+Power_vs_Vf     = forward_flight.Power_vs_Vf()
 
 
 
