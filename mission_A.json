@@ -1,0 +1,61 @@
+{
+    "mission": {
+      "1. takeoff": {
+        "alt": 2000,
+        "fuel": 50,
+        "payload": 50
+      },
+      "2. vertical_climb": {
+        "alt": 2020
+      },
+      "3. steady_climb": {
+        "alt": 2500,
+        "tailwind": 20
+      },
+      "4. level_flight": {
+        "distance": 100,
+        "tailwind": -20
+      },
+      "5. steady_descent": {
+        "alt": 2300,
+        "tailwind": -20
+      },
+      "6. hover": {
+        "alt": 2300,
+        "time": 60
+      },
+      "7. vertical_descent": {
+        "alt": 99999999
+      },
+      "8. payload_drop": {
+        "weight_to_drop": 50
+      },
+      "9. vertical_climb": {
+        "alt": 2300
+      },
+      "8. steady_climb": {
+        "alt": 2500,
+        "tailwind": 20
+      },
+      "9. level_flight": {
+        "distance": 100,
+        "tailwind": 20
+      },
+      "7. steady_descent": {
+        "alt": 2020,
+        "tailwind": -20
+      },
+      "8. vertical_descent": {
+        "alt": 2000
+      }
+    },
+    "parameters": {
+      "vertical_climb_speed": 2,
+      "steady_climb_forward_speed": 10,
+      "steady_climb_upward_speed": 2,
+      "level_flight_speed": 20,
+      "steady_descent_forward_speed": 10,
+      "steady_descent_downward_speed": -2,
+      "vertical_descent_speed": -1
+    }
+  }

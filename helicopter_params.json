@@ -1,0 +1,60 @@
+{
+  "main": {
+    "radius": 2,
+    "root_cutout": 0.5,
+    "num_blades": 2,
+    "c_l_a": 5.75,
+    "c_d0": 0.0113,
+    "c_d_b": 1.25,
+    "chord": 0.08,
+    "taper_ratio": 0.75,
+    "twist_angle_root": 3,
+    "twist_angle_tip": 0
+  },
+  "tail": {
+    "radius": 0.5,
+    "root_cutout": 0.1,
+    "num_blades": 2,
+    "c_l_a": 5.75,
+    "c_d0": 0.0113,
+    "c_d_b": 1.25,
+    "chord": 0.2,
+    "taper_ratio": 1,
+    "twist_angle_root": 3,
+    "twist_angle_tip": 0
+  },
+  "horizontal_stabilizer": {
+    "chord": 0.2,
+    "span": 0.8,
+    "c_la": 5.75,
+    "c_d0": 0.0113,
+    "c_ds": 1.25,
+    "x_cg": 6.5,
+    "z_cg": 0.112
+  },
+  "vertical_stabilizer": {
+    "chord": 0.3,
+    "span": 0.7,
+    "c_la": 5.75,
+    "c_d0": 0.0113,
+    "c_ds": 1.25,
+    "x_cg": 3,
+    "z_cg": 0.5
+  },
+  "helicopter": {
+    "payload": 50,
+    "fuel": 50,
+    "body_weight": 100,
+    "x_mr_cg": 0.5,
+    "x_tr_cg": 3,
+    "z_mr_cg": 1.5,
+    "z_tr_cg": 0.25,
+    "V": 13.9
+  },
+  "mission_planner": {
+    "fuel": 50,
+    "takeoff_alt": 2000,
+    "takeoff_weight": 200,
+    "body_weight": 100
+  }
+}
