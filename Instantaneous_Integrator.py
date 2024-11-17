@@ -82,6 +82,79 @@ class BEMT_Implementer():
 
         return self.Thrust, self.Torque, self.Power
     
+class Forward_flight_analyzer():
+    def __init__(self, simulator_inputs: U_Inputs_Simulator, pilot_inputs: Pilot_Inputs, blade:Blade, Atmosphere_data: Atmosphere, Airfoil=Airfoil_data, v_data= v_calculator):
+        self.rho_0      = 1.225             #kg/m^3   
+        Atmosphere_data = Atmosphere(simulator_inputs, rho_0=1.225, T_0=298, P_0=101325, Temp_grad=-6.5e-3)
+        Blade = Blade(simulator_inputs=simulator_inputs, pilot_inputs=pilot_inputs)     
+        self.simulator_inputs=simulator_inputs
+        self.pilot_inputs=Pilot_Inputs 
+        self.rho        = Atmosphere_data.rho_calc()
+        self.V          = simulator_inputs.V
+        self.MRR        = simulator_inputs.MRR
+        self.MRA        = simulator_inputs.MRA
+        self.omega      = simulator_inputs.MR_omega
+        self.MR_nb      = simulator_inputs.MR_nb
+        self.MR_rc      = simulator_inputs.MR_rc
+        self.omega      = (simulator_inputs.MR_omega)*math.pi*2/60
+        self.r          = Blade.Blade_sections(10)
+        self.chord_r    = Blade.chord()
+        self.VW         = simulator_inputs.VW
+        self.A          = simulator_inputs.MRA
+        self.phi        = Airfoil.Phi(self)
+        self.range      = simulator_inputs.No_of_iterations
+        self.v_data     = v_data(Blade, simulator_inputs)  # Creating an instance of v_calculator
+        self.v          = self.v_data.v_hover()  # Accessing v_hover from the instance
+        self.aoa        = Airfoil.AOA(self, self.phi)  
+        self.dr         = Blade.dr
+        self.MR_chord   = simulator_inputs.MR_chord
+        self.Cd_body    = simulator_inputs.Cd_body
+        self.body_area  = simulator_inputs.body_area
+        self.theta_0    = pilot_inputs.theta_0
+        self.theta_1c   = pilot_inputs.theta_1c
+        self.theta_1s   = pilot_inputs.theta_1s
+        self.beta_0     = 8
+        self.Cd0        = 0.09
+
+    def alpha_TPP_calc(self):
+        Body_drag=self.Cd_body*0.5*self.rho*self.V*self.V*self.body_area
+        alpha_tpp=np.arctan(Body_drag/self.VW)
+        return alpha_tpp
+    
+    def Forward_Flight_calculations(self, psi, T, r):
+        theta_root = self.theta_0 + self.theta_1s*np.sin(psi) + self.theta_1c*np.cos(psi)
+        self.dr                 = Blade.dr
+        theta = Blade.Pitch()
+        #calculating induced velocity for the given climb speed and blade dimensions
+        lambda_forward = v_calculator.lambda_forward(psi, r, self.alpha_tpp, T)
+        v_i = lambda_forward*self.MRR*self.omega
+        #calculating Perpendicular and Tangential Components
+        U_P = self.V*np.sin(self.alpha_tpp) + v_i + self.V*np.cos(psi)*np.sin(self.beta_0)
+        U_T = self.omega*r + self.V*np.cos(self.alpha_tpp)*np.sin(psi)
+        #calculating Angle of Attack at each section
+        phi = np.arctan2(U_P, U_T)
+        alpha_eff = theta - phi
+        #arrays to store sectional Thrust and Drag
+        T = []
+        D = []
+        #Assuming stall after angles <-15 and >15 degrees
+        for i in range(np.size(alpha_eff)):
+            self.aoa=alpha_eff
+            if (alpha_eff[i]>-15*np.pi/180 and alpha_eff[i]<15*np.pi/180):
+                cl, cd = Airfoil_data.get_ClCd()
+                #calculating Thrust and Drag at a given section and appending it
+                T.append((self.rho*e/2)*(U_P[i]*U_P[i]+U_T[i]*U_T[i])*c[i]*(cl*np.cos(phi[i])-cd*np.sin(phi[i]))*self.dr)
+                D.append((self.rho*e/2)*(U_P[i]*U_P[i]+U_T[i]*U_T[i])*c[i]*(cd*np.cos(phi[i])+cl*np.sin(phi[i]))*self.dr)
+            else:
+                cl = 0
+                cd = self.Cd0
+                #calculating Thrust and Drag at a given section and appending it
+                T.append((self.rho*e/2)*(U_P[i]*U_P[i]+U_T[i]*U_T[i])*c[i]*(cl*np.cos(phi[i])-cd*np.sin(phi[i]))*self.dr)
+                D.append((self.rho*e/2)*(U_P[i]*U_P[i]+U_T[i]*U_T[i])*c[i]*(cd*np.cos(phi[i])+cl*np.sin(phi[i]))*self.dr)
+        T = np.array(T)
+        D = np.array(D)
+        #returning the given sectional forces array                 
+        return T, D
     
     
 

@@ -1,7 +1,9 @@
 from Blade_G    import Blade
 from AirData    import Atmosphere
-from U_inputs   import U_Inputs_Simulator, U_Inputs_Planner
+from U_inputs   import *
 from Inflow     import v_calculator
+from Airfoil import Airfoil_data
+from Instantaneous_Integrator import BEMT_Implementer, Forward_flight_analyzer
 
 import math
 import numpy as np
@@ -251,191 +253,114 @@ class Forward_Flight():
         plt.grid()
         return plt.show()
 
-import matplotlib.pyplot as plt
+class MissionCoordinator:
+    def __init__(self, simulator_inputs: U_Inputs_Simulator, pilot_inputs: Pilot_Inputs):
+        self.simulator_inputs = simulator_inputs
+        self.pilot_inputs = pilot_inputs
 
-# Constants and parameters
-GRAVITY = 9.81  # Gravity acceleration (m/s^2)
-DESIRED_CLIMB_RATE = 20.0  # m/s, desired climb rate for successful missions
-DESIRED_CRUISE_SPEED = 60.0  # m/s, desired cruise speed for level flight
-FUEL_CONSUMPTION_RATE = 0.1  # Fuel consumption rate (kg/s)
+        # Fuel energy content in J/kg and initialize with provided fuel weight
+        self.fuel_energy_content = 43.124 * 1e6  # J/kg
+        self.fuel_weight = simulator_inputs.FW
+        self.payload_weight = simulator_inputs.VW
+        self.gross_weight = self.payload_weight + self.fuel_weight
+        self.altitude = simulator_inputs.Altitude
 
-# Helicopter performance constants (example values)
-MAX_ENGINE_POWER = 500  # kW, example maximum power available
-MAX_FUEL_CAPACITY = 1000  # kg, maximum fuel capacity
+        # Environment setup
+        self.atmosphere = Atmosphere(simulator_inputs, pilot_inputs)
 
-# Mission scenarios
-missions = [
-    {"name": "Successful Payload Drop", "task": "vertical climb, steady climb"},
-    {"name": "Successful Payload Pickup", "task": "steady climb, vertical climb"},
-    {"name": "Fuel-Limited Unsuccessful Payload Pickup", "task": "steady climb, vertical climb, fuel constraints"},
-    {"name": "Power-Limited Unsuccessful Payload Drop", "task": "level flight, power constraints"}
-]
+        # Blade and aerodynamic components
+        self.blade = Blade(simulator_inputs, pilot_inputs)
+        self.airfoil = Airfoil_data(simulator_inputs, self.atmosphere)
 
-# Auxiliary functions for fuel and weight calculations
-def calculate_air_density(temperature, pressure):
-    """Simple function to calculate air density using the ideal gas law (simplified)."""
-    R = 287.05  # Specific gas constant for dry air (J/(kg·K))
-    temp_kelvin = temperature + 273.15
-    air_density = pressure / (R * temp_kelvin)
-    return air_density
+        # Propeller efficiency estimations
+        self.hover_solver = BEMT_Implementer(simulator_inputs, pilot_inputs, self.blade, self.atmosphere, self.airfoil)
 
-def vertical_climb(initial_weight, fuel_weight, climb_rate):
-    """Calculate the vertical climb phase."""
-    max_altitude = 1000  # m
-    time_to_max_altitude = max_altitude / climb_rate
-    gross_weight_at_max_altitude = initial_weight - fuel_weight
-    return time_to_max_altitude, gross_weight_at_max_altitude
+        # Mission logs for output analysis
+        self.mission_log = {
+            "altitudes": [],
+            "fuel_weights": [],
+            "power_used": [],
+            "distances": [],
+            "times": [],
+        }
 
-def steady_climb(initial_weight, fuel_weight, climb_rate, wind_speed):
-    """Calculate the steady climb phase with wind conditions."""
-    net_climb_rate = climb_rate - wind_speed
-    max_altitude = 1000  # m
-    time_to_max_altitude = max_altitude / net_climb_rate
-    gross_weight_at_max_altitude = initial_weight - fuel_weight
-    return time_to_max_altitude, gross_weight_at_max_altitude
+    def calculate_available_power(self):
+        # Calculate available power at the current altitude
+        density_ratio = self.atmosphere.rho_calc() / 1.225  # Standard sea-level density
+        max_power = (density_ratio * self.simulator_inputs.MRA * 1e3)  # Scale with density
+        return max_power
 
-def level_flight(initial_weight, fuel_weight, cruise_speed):
-    """Calculate the level flight phase."""
-    time_to_runout = fuel_weight / FUEL_CONSUMPTION_RATE
-    distance_covered = cruise_speed * time_to_runout
-    fuel_consumed = FUEL_CONSUMPTION_RATE * time_to_runout
-    return distance_covered, fuel_consumed
+    def calculate_fuel_consumption(self, power, duration):
+        # Calculate fuel consumption based on power (kW) and duration (seconds)
+        sfc = self.simulator_inputs.SFC  # kg/kWh
+        fuel_used = sfc * power * duration / 3600  # Convert time to hours
+        return fuel_used
 
-def power_limited_climb(initial_weight, fuel_weight, climb_rate, available_power):
-    """Check if climb rate is achievable based on available power."""
-    power_required_for_climb = (initial_weight * GRAVITY * climb_rate) / available_power
-    if power_required_for_climb > available_power:
-        return False  # Not enough power for the climb
-    return True
+    def initialize_simulation(self):
+        # Log the starting state of the mission
+        self.mission_log["altitudes"].append(self.altitude)
+        self.mission_log["fuel_weights"].append(self.fuel_weight)
+        self.mission_log["power_used"].append(0)
+        self.mission_log["distances"].append(0)
+        self.mission_log["times"].append(0)
 
+    def update_mission(self, power_used, distance_covered, time_step):
+        # Update mission log and internal state
+        fuel_used = self.calculate_fuel_consumption(power_used, time_step)
+        self.fuel_weight -= fuel_used
+        self.gross_weight -= fuel_used
 
-def plot_mission_results(mission_results, mission_type, initial_weight, fuel_burn_rate):
-    """Plot mission results (e.g., weight, fuel consumption, etc.) in multiple subplots."""
-    
-    # Initialize lists to store times, weights, and other metrics for plotting
-    times = []
-    weights = []
-    fuel_consumed = []
-    distances = []
-    climb_rates = []
+        # Check for limits
+        if self.fuel_weight < 0:
+            raise Exception("Fuel exceeded! Mission cannot continue.")
+        if power_used > self.calculate_available_power():
+            raise Exception("Power exceeded! Mission cannot continue.")
 
-    current_weight = initial_weight  # Start with initial gross weight
-    total_fuel_consumed = 0  # Initialize fuel consumed
+        # Log updates
+        self.mission_log["fuel_weights"].append(self.fuel_weight)
+        self.mission_log["power_used"].append(power_used)
+        self.mission_log["distances"].append(self.mission_log["distances"][-1] + distance_covered)
+        self.mission_log["times"].append(self.mission_log["times"][-1] + time_step)
 
-    # Process mission results
-    for result in mission_results:
-        if len(result) == 2:  # Vertical and Steady Climb (time, weight)
-            time, weight = result
-            times.append(time)
-            weights.append(weight)
-            fuel_consumed.append(total_fuel_consumed)
-            distances.append(0)  # No distance covered in climb phase
-            climb_rates.append(weight)  # Use weight as a placeholder for climb rate (can refine later)
-        elif len(result) == 3:  # Level Flight (distance, fuel consumption)
-            distance, fuel = result
-            # Calculate time from distance (distance / speed)
-            time = distance / DESIRED_CRUISE_SPEED
-            total_fuel_consumed += fuel
-            current_weight = initial_weight - total_fuel_consumed
-            times.append(time)
-            weights.append(current_weight)
-            fuel_consumed.append(total_fuel_consumed)
-            distances.append(distance)
-            climb_rates.append(0)  # No climb during level flight, so no climb rate
+    def simulate_hover(self, duration):
+        # Simulate hover for the given duration
+        thrust = self.gross_weight * 9.81  # N
+        power_required = self.hover_solver.Power_Calculator()
+        self.update_mission(power_required, 0, duration)
 
-    # Ensure times and weights have the same dimensions for plotting
-    if len(times) != len(weights):
-        print(f"Error: Times and Weights have different lengths for {mission_type}.")
-        return
+    def simulate_forward_flight(self, velocity, distance):
+        # Simulate forward flight for a given distance and velocity
+        flight_time = distance / velocity
+        power_solver = Forward_flight_analyzer(self.simulator_inputs, self.pilot_inputs, self.blade, self.atmosphere)
+        power_required = power_solver.Power_Calculator()
 
-    # Create subplots in a 2x2 grid
-    plt.figure(figsize=(12, 10))
+        for t in np.arange(0, flight_time, 1):
+            self.update_mission(power_required, velocity, 1)
 
-    # Plot 1: Gross Weight vs Time
-    plt.subplot(2, 2, 1)
-    plt.plot(times, weights, label=f'{mission_type} Gross Weight', color='b')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Weight (kg)')
-    plt.title(f'{mission_type} - Gross Weight Over Time')
-    plt.grid(True)
-    plt.legend()
+    def handle_takeoff(self, hover_duration):
+        # Handle initial hover phase during takeoff
+        self.simulate_hover(hover_duration)
 
-    # Plot 2: Fuel Consumption vs Time
-    plt.subplot(2, 2, 2)
-    plt.plot(times, fuel_consumed, label=f'{mission_type} Fuel Consumption', color='g')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Fuel Consumed (kg)')
-    plt.title(f'{mission_type} - Fuel Consumption Over Time')
-    plt.grid(True)
-    plt.legend()
+    def handle_climb(self, climb_rate, target_altitude):
+        # Simulate vertical climb
+        climb_time = (target_altitude - self.altitude) / climb_rate
+        thrust = self.gross_weight * 9.81
+        power_solver = BEMT_Implementer(self.simulator_inputs, self.pilot_inputs, self.blade, self.atmosphere)
+        power_required = power_solver.Power_Calculator()
 
-    # Plot 3: Climb Rate vs Time (placeholder for vertical climb or steady climb rates)
-    plt.subplot(2, 2, 3)
-    plt.plot(times, climb_rates, label=f'{mission_type} Climb Rate', color='r')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Climb Rate (m/s)')
-    plt.title(f'{mission_type} - Climb Rate Over Time')
-    plt.grid(True)
-    plt.legend()
+        for t in np.arange(0, climb_time, 1):
+            self.update_mission(power_required, 0, 1)
+        self.altitude = target_altitude
 
-    # Plot 4: Distance Covered vs Time (level flight)
-    plt.subplot(2, 2, 4)
-    plt.plot(times, distances, label=f'{mission_type} Distance Covered', color='c')
-    plt.xlabel('Time (s)')
-    plt.ylabel('Distance (m)')
-    plt.title(f'{mission_type} - Distance Covered Over Time')
-    plt.grid(True)
-    plt.legend()
+    def run_mission(self, mission_plan):
+        self.initialize_simulation()
+        for phase in mission_plan:
+            if phase["type"] == "takeoff":
+                self.handle_takeoff(phase["duration"])
+            elif phase["type"] == "climb":
+                self.handle_climb(phase["climb_rate"], phase["target_altitude"])
+            elif phase["type"] == "forward_flight":
+                self.simulate_forward_flight(phase["velocity"], phase["distance"])
 
-    plt.tight_layout()  # Adjust layout for neat display
-    plt.show()
-
-
-# Mission Execution and Planning
-def execute_mission(mission):
-    """Execute the mission based on its task requirements."""
-    print(f"Executing mission: {mission['name']}")
-
-    initial_weight = 50  # kg, example initial weight
-    fuel_weight = 10     # kg, example initial fuel weight
-    mission_results = []
-
-    # Check for fuel constraints
-    if "fuel constraints" in mission['task']:
-        if fuel_weight < 100:
-            print("Mission fuel-limited: Insufficient fuel for climb.")
-            return mission_results
-
-    # Check for power constraints
-    if "power constraints" in mission['task']:
-        if not power_limited_climb(initial_weight, fuel_weight, DESIRED_CLIMB_RATE, MAX_ENGINE_POWER):
-            print("Mission power-limited: Not enough power for climb.")
-            return mission_results
-
-    # Execute the segments based on the task requirements
-    if "vertical climb" in mission['task']:
-        time_to_max_altitude, gross_weight_at_max = vertical_climb(initial_weight, fuel_weight, DESIRED_CLIMB_RATE)
-        mission_results.append((time_to_max_altitude, gross_weight_at_max))
-        print(f"Time to reach max altitude (vertical climb): {time_to_max_altitude} seconds")
-        print(f"Gross weight at max altitude: {gross_weight_at_max} kg")
-
-    if "steady climb" in mission['task']:
-        wind_speed = 5.0  # m/s, example wind speed
-        time_to_max_altitude, gross_weight_at_max = steady_climb(initial_weight, fuel_weight, DESIRED_CLIMB_RATE, wind_speed)
-        mission_results.append((time_to_max_altitude, gross_weight_at_max))
-        print(f"Time to reach max altitude (steady climb): {time_to_max_altitude} seconds")
-        print(f"Gross weight at max altitude: {gross_weight_at_max} kg")
-
-    if "level flight" in mission['task']:
-        distance, fuel_used = level_flight(initial_weight, fuel_weight, DESIRED_CRUISE_SPEED)
-        mission_results.append((distance, fuel_used))
-        print(f"Distance covered during level flight: {distance} meters")
-        print(f"Fuel consumed during level flight: {fuel_used} kg")
-
-    plot_mission_results(mission_results, mission['name'], initial_weight=50, fuel_burn_rate=0.25)
-    return mission_results
-
-# Main execution loop for all missions
-if __name__ == "__main__":
-    for mission in missions:
-        execute_mission(mission)
+        # Return mission log for analysis
+        return self.mission_log

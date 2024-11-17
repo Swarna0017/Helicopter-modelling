@@ -1,60 +1,38 @@
 {
-  "main": {
-    "radius": 2,
-    "root_cutout": 0.5,
-    "num_blades": 2,
-    "c_l_a": 5.75,
-    "c_d0": 0.0113,
-    "c_d_b": 1.25,
-    "chord": 0.08,
-    "taper_ratio": 0.75,
-    "twist_angle_root": 3,
-    "twist_angle_tip": 0
+  "simulator_inputs": {
+    "Altitude": 5000,
+    "MRR": 0.762,
+    "TRR": 0.5,
+    "V": 100,
+    "Vf": 140,
+    "VW": 50,
+    "MR_nb": 3,
+    "TR_nb": 2,
+    "MR_Taper_ratio": 0.8,
+    "TR_Taper_ratio": 0.8,
+    "MR_rc": 0.125,
+    "TR_rc": 0.1,
+    "MR_root_twist": 4,
+    "MR_tip_twist": 0,
+    "TR_root_twist": 4,
+    "TR_tip_twist": 0,
+    "MR_chord": 0.0508,
+    "TR_chord": 0.2,
+    "HS_chord": 0.09,
+    "MR_omega": 200,
+    "MRA": 1.827,
+    "Iterations": 100,
+    "Cd_body": 0.3,
+    "body_area": 2,
+    "SFC": 0.00036,
+    "FW": 10,
+    "Blade_Cd": 0.007,
+    "Blade_Cl": 0.09
   },
-  "tail": {
-    "radius": 0.5,
-    "root_cutout": 0.1,
-    "num_blades": 2,
-    "c_l_a": 5.75,
-    "c_d0": 0.0113,
-    "c_d_b": 1.25,
-    "chord": 0.2,
-    "taper_ratio": 1,
-    "twist_angle_root": 3,
-    "twist_angle_tip": 0
-  },
-  "horizontal_stabilizer": {
-    "chord": 0.2,
-    "span": 0.8,
-    "c_la": 5.75,
-    "c_d0": 0.0113,
-    "c_ds": 1.25,
-    "x_cg": 6.5,
-    "z_cg": 0.112
-  },
-  "vertical_stabilizer": {
-    "chord": 0.3,
-    "span": 0.7,
-    "c_la": 5.75,
-    "c_d0": 0.0113,
-    "c_ds": 1.25,
-    "x_cg": 3,
-    "z_cg": 0.5
-  },
-  "helicopter": {
-    "payload": 50,
-    "fuel": 50,
-    "body_weight": 100,
-    "x_mr_cg": 0.5,
-    "x_tr_cg": 3,
-    "z_mr_cg": 1.5,
-    "z_tr_cg": 0.25,
-    "V": 13.9
-  },
-  "mission_planner": {
-    "fuel": 50,
-    "takeoff_alt": 2000,
-    "takeoff_weight": 200,
-    "body_weight": 100
+  "pilot_inputs": {
+    "theta_0": 10,
+    "theta_1s": 0,
+    "theta_1c": 0,
+    "theta_tail": 0
   }
 }

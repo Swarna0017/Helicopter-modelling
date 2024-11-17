@@ -1,0 +1,69 @@
+{
+  "mission": [
+    {
+      "type": "takeoff",
+      "hover_duration": 30
+    },
+    {
+      "type": "climb",
+      "climb_rate": 2,
+      "target_altitude": 2020
+    },
+    {
+      "type": "climb",
+      "climb_rate": 2,
+      "target_altitude": 2500,
+      "tailwind": 20
+    },
+    {
+      "type": "forward_flight",
+      "velocity": 20,
+      "distance": 100
+    },
+    {
+      "type": "climb",
+      "climb_rate": -2,
+      "target_altitude": 2300,
+      "tailwind": -20
+    },
+    {
+      "type": "hover",
+      "duration": 60
+    },
+    {
+      "type": "payload_drop",
+      "weight_to_drop": 50
+    },
+    {
+      "type": "climb",
+      "climb_rate": 2,
+      "target_altitude": 2500,
+      "tailwind": 20
+    },
+    {
+      "type": "forward_flight",
+      "velocity": 20,
+      "distance": 100
+    },
+    {
+      "type": "climb",
+      "climb_rate": -2,
+      "target_altitude": 2020,
+      "tailwind": -20
+    },
+    {
+      "type": "climb",
+      "climb_rate": -1,
+      "target_altitude": 2000
+    }
+  ],
+  "parameters": {
+    "vertical_climb_speed": 2,
+    "steady_climb_forward_speed": 10,
+    "steady_climb_upward_speed": 2,
+    "level_flight_speed": 20,
+    "steady_descent_forward_speed": 10,
+    "steady_descent_downward_speed": -2,
+    "vertical_descent_speed": -1
+  }
+}

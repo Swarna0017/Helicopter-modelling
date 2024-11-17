@@ -44,9 +44,8 @@ class Blade:
 
     def Pitch(self):  # Generates values of theta based on twist for each r
         theta_r = []
-        # Calculate the twist distribution 'F' for each radial location
+        # Calculates the twist distribution 'F' for each radial location
         F = [((self.MR_root_twist - self.MR_tip_twist) / (self.MRR - self.MR_rc)) * (r - self.MR_rc) for r in self.r]
-        # Now calculate the pitch angle for each radial location
         theta_r = [self.MR_theta + F_i for F_i in F]
         return theta_r
     
@@ -66,6 +65,6 @@ class Blade:
         return chord_r
     
     def Blade_Chord_dict(self):
-        return {r: chord_r for r, chord_r in zip(self.r, self.chord())}
+        return {r: chord_r for r, chord_r in zip(self.r, self.chord())}         # Dictionary storing the values of blade radii with the corresponding chords
 
 
