@@ -23,7 +23,7 @@ def Input_Plugger():
     TR_chord        = 0.2                       # Tail rotor blade chord
     HS_chord        = 0.09                      # Horizontal stabilizer blade chord
     MR_omega        = 200                       # Enter the RPM of the main rotor blades
-    MRA             = np.pi*MRR**2
+    MRA             = np.pi*MRR**2              # main rotor area
     Iterations      = 100                       # the number of iterations for force calculation
     Cd_body         = 0.3                       # Enter the body drag coefficient for your helicopter, if unknown, use the following reference: 
     body_area       = 2  # (fuselage body area) # Cd = 0.2 to 0.4 for small helicopters, 0.3 to 0.5 for medium helicpters, 0.4 to 0.6 for militray helicopters, and 0.15 to 0.25 for highly streamlined models
