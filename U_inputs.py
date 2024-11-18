@@ -36,9 +36,9 @@ def Input_Plugger():
 
 def Pilot_Input_Plugger():
     theta_0         = 10                         # Main Rotor Collective pitch 
-    theta_1s        = 0                          # Main Rotor longitudinal Cyclic
-    theta_1c        = 0                          # Main Rotor lateral Cyclic
-    theta_tail      = 0                          # Tail Rotor Collective
+    theta_1s        = 5                          # Main Rotor longitudinal Cyclic
+    theta_1c        = 7                          # Main Rotor lateral Cyclic
+    theta_tail      = 20                          # Tail Rotor Collective
     return theta_0, theta_1s, theta_1c, theta_tail
  
 # Calling the Input_Plugger function to store the values in the following variables

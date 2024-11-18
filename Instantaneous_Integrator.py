@@ -131,6 +131,8 @@ class Forward_flight_analyzer():
         #calculating Perpendicular and Tangential Components
         U_P = self.V*np.sin(self.alpha_tpp) + v_i + self.V*np.cos(psi)*np.sin(self.beta_0)
         U_T = self.omega*r + self.V*np.cos(self.alpha_tpp)*np.sin(psi)
+        cl, cd = Airfoil_data.get_ClCd()
+        chord_r = Blade.chord()
         #calculating Angle of Attack at each section
         phi = np.arctan2(U_P, U_T)
         alpha_eff = theta - phi
@@ -143,34 +145,20 @@ class Forward_flight_analyzer():
             if (alpha_eff[i]>-15*np.pi/180 and alpha_eff[i]<15*np.pi/180):
                 cl, cd = Airfoil_data.get_ClCd()
                 #calculating Thrust and Drag at a given section and appending it
-                T.append((self.rho*e/2)*(U_P[i]*U_P[i]+U_T[i]*U_T[i])*c[i]*(cl*np.cos(phi[i])-cd*np.sin(phi[i]))*self.dr)
-                D.append((self.rho*e/2)*(U_P[i]*U_P[i]+U_T[i]*U_T[i])*c[i]*(cd*np.cos(phi[i])+cl*np.sin(phi[i]))*self.dr)
+                T.append((self.rho*1/2)*(U_P[i]*U_P[i]+U_T[i]*U_T[i])*chord_r*(cl*np.cos(phi[i])-cd*np.sin(phi[i]))*self.dr)
+                D.append((self.rho*1/2)*(U_P[i]*U_P[i]+U_T[i]*U_T[i])*chord_r*(cd*np.cos(phi[i])+cl*np.sin(phi[i]))*self.dr)
             else:
                 cl = 0
                 cd = self.Cd0
                 #calculating Thrust and Drag at a given section and appending it
-                T.append((self.rho*e/2)*(U_P[i]*U_P[i]+U_T[i]*U_T[i])*c[i]*(cl*np.cos(phi[i])-cd*np.sin(phi[i]))*self.dr)
-                D.append((self.rho*e/2)*(U_P[i]*U_P[i]+U_T[i]*U_T[i])*c[i]*(cd*np.cos(phi[i])+cl*np.sin(phi[i]))*self.dr)
+                T.append((self.rho*1/2)*(U_P[i]*U_P[i]+U_T[i]*U_T[i])*chord_r*(cl*np.cos(phi[i])-cd*np.sin(phi[i]))*self.dr)
+                D.append((self.rho*1/2)*(U_P[i]*U_P[i]+U_T[i]*U_T[i])*chord_r*(cd*np.cos(phi[i])+cl*np.sin(phi[i]))*self.dr)
         T = np.array(T)
         D = np.array(D)
         #returning the given sectional forces array                 
         return T, D
     
     
-
-
-
-            
-        
-
-
-
-        
-
-    
-        
-
-
 def MT_Implementer():
     def Thrust_Calculator(self):
         Thrust_hover=2*self.v**2*self.rho*self.A                    # This calculates the Thrust for hover case (Momentum Theory)

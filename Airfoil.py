@@ -1,4 +1,4 @@
-# Defines the airfoil profiles you use
+# Defines the airfoil profiles
 # Different Airfoil models have been documented for usage. Selection as per necessity/benefit of usage.
 import numpy as np
 import math

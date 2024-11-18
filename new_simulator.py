@@ -7,19 +7,29 @@ from tkinter import messagebox                       # Importing messagebox from
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg  # Importing FigureCanvasTkAgg for embedding matplotlib plots in tkinter
 import matplotlib.pyplot as plt                      # Importing matplotlib for plotting graphs
 from PIL import Image, ImageTk                       # Importing Image and ImageTk from PIL to handle image processing
-# from blade import *
-# from Atmosphere import *
-# from Cl import *
-# from FS_user_inputs2 import *
-# from inflow import *
+from U_inputs import U_Inputs_Simulator, Pilot_Inputs
+from Cyclic_Integrator import Cyclic_analyzer
+import numpy as np
 
 """ Import your functions data here, from your_file_name import your_class_name_in_file. If the functions are  
 written using non-oops concept, you try with this command from your_file_name import * """
-from New_dummy_data import SimulationData            # Importing dummy data developed under SimulationData class 
+# Initialize inputs for the rotor dynamics simulation
+simulator_inputs = U_Inputs_Simulator(
+    Altitude=5000, MRR=0.762, TRR=0.5, V=100, Vf=140, VW=50 * 9.81,
+    MR_nb=3, TR_nb=2, MR_Taper_ratio=0.8, TR_Taper_ratio=0.8, MR_rc=0.125,
+    TR_rc=0.1, MR_root_twist=4, MR_tip_twist=0, TR_root_twist=4, TR_tip_twist=0,
+    MR_chord=0.0508, TR_chord=0.2, HS_chord=0.09, MR_omega=200,
+    MRA=np.pi * 0.762**2, Iterations=100, Cd_body=0.3, body_area=2,
+    SFC=0.36 / 1000, FW=10 * 9.81, Blade_Cd=0.007, Blade_Cl=0.09
+)
+pilot_inputs = Pilot_Inputs(theta_0=10, theta_1s=0, theta_1c=0, theta_tail=0)
+
+# Create an instance of the RotorAerodynamics class
+rotor_aerodynamics = Cyclic_analyzer(simulator_inputs, pilot_inputs)
 
 root = tk.Tk()                                       # Creating the main window for the application
 """ Change SimulationData() class to your respective class """
-sim_data = SimulationData()                          # Creating an instance of the SimulationData class
+sim_data = rotor_aerodynamics                        # Creating an instance of the SimulationData class
 plots_data = {}                                      # Initialize a dictionary to store data for the plots
 graph_var1 = tk.StringVar(value="Forces X")          # Creating a StringVar to hold the selected graph type for the first plot
 graph_var2 = tk.StringVar(value="Moments X")         # Creating a StringVar to hold the selected graph type for the second plot
@@ -27,33 +37,50 @@ auto_run = tk.BooleanVar(value=False)                # Creating a BooleanVar to 
 
 """ This is the important function where you are connecting your defined force and moment functions """
 def run_simulation():
-    #Runs simulation and update plots
+    """
+    Runs the rotor dynamics simulation and updates plots with computed forces and moments.
+    """
     try:
-        # Get values from sliders
+        # Get user inputs from sliders
         collective_pitch = float(collective_pitch_entry.get())
         lateral_pitch = float(lateral_pitch_entry.get())
         longitudinal_pitch = float(longitudinal_pitch_entry.get())
         tail_rotor_collective = float(tail_rotor_collective_entry.get())
 
-        """ Connect your functions here properly, in this example, sim_dat.generate_force_x is function called from sim_data class named generate_force_x
-         which can take the inputs(arguments) of collective_pitch, lateral_pitch, longitudinal_pitch and tail_rotor_collective """
-        # Generates simulation data for different forces and moments
-        plots_data["Forces X"] = sim_data.generate_forces_x(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
-        plots_data["Forces Y"] = sim_data.generate_forces_y(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
-        plots_data["Forces Z"] = sim_data.generate_forces_z(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
-        plots_data["Forces XYZ"] = sim_data.generate_forces_xyz(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
-        plots_data["Moments X"] = sim_data.generate_moments_x(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
-        plots_data["Moments Y"] = sim_data.generate_moments_y(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
-        plots_data["Moments Z"] = sim_data.generate_moments_z(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
-        plots_data["Moments XYZ"] = sim_data.generate_moments_xyz(collective_pitch, lateral_pitch, longitudinal_pitch, tail_rotor_collective)
+        # Update pilot inputs dynamically
+        pilot_inputs.theta_0 = collective_pitch
+        pilot_inputs.theta_1s = lateral_pitch
+        pilot_inputs.theta_1c = longitudinal_pitch
 
-        # Update the plots with the new data
-        update_plot(ax1, canvas1, graph_var1.get(),plots_data)
+        # Compute vertical flight forces and moments
+        thrust_req = simulator_inputs.VW  # Assume thrust required equals weight for hover
+        results_vertical = rotor_aerodynamics.calculate_vertical_forces(thrust_req, collective_pitch, longitudinal_pitch, lateral_pitch)
+        print("Results Vertical:", results_vertical)  # Debugging
+
+        # Compute forward flight forces and moments (for comparison)
+        alpha_TPP = 5 * np.pi / 180  # Example tip-path-plane angle
+        results_forward = rotor_aerodynamics.calculate_forward_forces(thrust_req, alpha_TPP, collective_pitch, longitudinal_pitch, lateral_pitch)
+        print("Results Forward:", results_forward)  # Debugging
+
+        # Extract results for plotting
+        plots_data["Forces X"] = results_vertical[1]  # Total thrust
+        plots_data["Forces Y"] = results_vertical[2]  # Total torque
+        plots_data["Forces Z"] = results_vertical[5]  # Coning angle
+        plots_data["Forces XYZ"] = [results_vertical[1], results_vertical[2], results_vertical[5]]
+
+        plots_data["Moments X"] = results_vertical[3]  # Roll moment
+        plots_data["Moments Y"] = results_vertical[4]  # Pitch moment
+        plots_data["Moments Z"] = results_forward[3]  # Example yaw moment
+        plots_data["Moments XYZ"] = [results_vertical[3], results_vertical[4], results_forward[3]]
+
+        print("Plots Data:", plots_data)  # Debugging
+
+        # Update the plots with the computed data
+        update_plot(ax1, canvas1, graph_var1.get(), plots_data)
         update_plot(ax2, canvas2, graph_var2.get(), plots_data)
 
     except ValueError:
-        messagebox.showerror("Invalid Input", "Please ensure all input fields are filled with valid numbers.")  # Show error if inputs are invalid
-
+        messagebox.showerror("Invalid Input", "Please ensure all input fields are filled with valid numbers.")
 
 
 """ Don't change anything from here """
@@ -127,22 +154,25 @@ def update_plot(ax, canvas, graph_type, plots_data):
     ax.clear()  # Clear the current plot
 
     if graph_type in plots_data:
-        data = plots_data[graph_type]  # Get the data for the selected graph type
+        data = plots_data[graph_type]
 
-        if len(data) == 2:  # Single y data case
-            x, y = data
-            ax.plot(x, y, label=graph_type)
-        elif len(data) == 4:  # Separate x, y, z components case
-            x, force_x, force_y, force_z = data
-            ax.plot(x, force_x, label=f'{graph_type} - X')
-            ax.plot(x, force_y, label=f'{graph_type} - Y')
-            ax.plot(x, force_z, label=f'{graph_type} - Z')
-        else:
-            raise ValueError("Unexpected data format for plotting")
+        if isinstance(data, (list, np.ndarray)):  # Data is a list or array
+            if len(data) == 2:  # Single y data case (x and y)
+                x, y = data
+                ax.plot(x, y, label=graph_type)
+            elif len(data) == 3:  # Separate x, y, z components
+                x, y, z = range(len(data[0])), data[1], data[2]
+                ax.plot(x, y, label=f'{graph_type} - Y')
+                ax.plot(x, z, label=f'{graph_type} - Z')
+        else:  # Scalar value case
+            x = [0, 1]
+            y = [0, data]  # Create a simple line to visualize the scalar
+            ax.plot(x, y, label=f'{graph_type} (Scalar)')
 
-    ax.set_title(graph_type)  # Set the plot title to the selected graph type
-    ax.legend()  # Display the legend
-    canvas.draw()  # Refresh the canvas to show the updated plot
+    ax.set_title(graph_type)
+    ax.legend()
+    canvas.draw()
+
 
 
 def reset_fields():

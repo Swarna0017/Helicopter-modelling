@@ -1,10 +1,10 @@
-# This file calculates the environment data in which your helicopter is supposed to fly
+# This file calculates the environment data in which the helicopter is supposed to fly
 
 import numpy as np
 import math
 from U_inputs import U_Inputs_Simulator, Pilot_Inputs
 
-# This class gives you the density, pressure, speed of sound at a particular altitude
+# This class gives the density, pressure, speed of sound at a particular altitude
 class Atmosphere():
     
     def __init__(self, simulator_inputs: U_Inputs_Simulator,  pilot_inputs: Pilot_Inputs):
